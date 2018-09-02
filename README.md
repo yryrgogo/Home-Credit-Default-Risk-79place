@@ -1,14 +1,14 @@
 # home-credit-default-risk
 kaggle competition
 
-## Try
+## Log
 
-### やったこと
+### Try
 前処理（外れ値除去、収縮、欠損値補完・回帰）、エンコーディング一式はSolution見る限りそこまで問題はなかった 
 特徴作成で試せていなかったのはoof Predictionくらいで他はほぼ作ってた（しかしここで差がついた）   
 KernelやDiscussionを一通り試した  
 
-### やれなかったこと
+### No Try
 Posテーブルのクレンジングが十分でなく甘かった。  
 各テーブル別に予測モデルを作成しoofでStacking（終盤までStackingを使ってCVを伸ばそうというつもりがなかった）  
 Train/Test分布の違いは知りつつ、その違いをモデルに学習させることはできなかった。  
@@ -29,24 +29,31 @@ Stackingをよくわかってなかったので後回しにした
 Ensamble  
 試行錯誤のログ管理  
 
+**
 ### TODO
 ターゲットエンコーディングでCVとLBが完璧に相関していた理由を確認する（なぜPBだけ伸びなかったのか？）  
 Sampleに対する予測ウェイトを管理できるようにする  
 GCP, terminal, pythonの連携周りをスムーズにする。まだ余計ない手間が多い  
 
+**
 ## Winners Solution
+
 ### 3th
 SK_ID_PREVレベルで予測を行い、予測値を集計してそのテーブルに関する特徴量とする  
 モデルはテーブルをマージせず個別に作成し、メインモデルにまとめた  
 EXTも予測させ、オリジナルとの違いなども特徴とした  
 INCOMEの予測は失敗した  
+
 ### 17th
 SK_ID_PREVレベルで予測を行い、予測値を集計してそのテーブルに関する特徴量とする  
+
 ### 7th
 時系列feature  
 異なるデータセットで作った11モデルのstacking, CV0.793のNNなど。  
+
 ### 16th
 普通の集計と時系列featureとGPのstacking。11モデルくらい  
+
 ### 10th
 CNT_PAYMENTを予測するモデルをapplicationの為に作った  
 金利の特徴をちゃんと作った  
@@ -55,7 +62,9 @@ bureauはActiveテーブルとClosedテーブルを作った。3, 6, 18, 30, 42,
 直近何割のレコード、一番過去の何割かのレコード（0.1~0.4）  
 SK_ID_CURR, SK_ID_PREVでgroupbyした  
 oliverのfeature selectionを使った  
+
 ### 5th
+
 1.  
 各ID毎に96ヶ月のデータ横持ちの表にして、画像分類としてベクタライズした  
 CVの各foldに閾値を設定し、その閾値を超えた特徴を選ぶ  
