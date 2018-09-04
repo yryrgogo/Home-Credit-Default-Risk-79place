@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 
 
+*.p
+*.pickle
+*.pkl
 *.csv
 *.xls
 *.xlsx
