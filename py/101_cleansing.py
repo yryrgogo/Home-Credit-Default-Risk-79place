@@ -1,3 +1,4 @@
+import gc
 import numpy as np
 import pandas as pd
 import sys
@@ -5,11 +6,14 @@ import re
 from glob import glob
 import os
 HOME = os.path.expanduser('~')
-sys.path.append(f"{HOME}/kaggle/github/library/")
+#  sys.path.append(f"{HOME}/kaggle/github/library/")
+sys.path.append(f"/mnt/c/Git/go/kaggle/github/library/")
 import utils
 from logger import logger_func
 logger = logger_func()
 import eda
+from convinience_function import get_categorical_features
+
 
 #==============================================================================
 # pickleにする 
@@ -66,14 +70,30 @@ logger.info(f'''
 utils.start(sys.argv[0])
 
 
-def clean_app():
+def clean_app(app):
     logger.info(f'''
     #==============================================================================
     # APPLICATION CLEANSING
     #==============================================================================''')
-    app = utils.read_df_pickle(path='../input/application*.p')
+
+    revo = 'Revolving loans'
+    drop_list = [col for col in app.columns if col.count('is_train') or col.count('is_test') or col.count('valid_no')]
+    app.drop(drop_list, axis=1, inplace=True)
+
     app['AMT_INCOME_TOTAL'] = app['AMT_INCOME_TOTAL'].where(app['AMT_INCOME_TOTAL']<1000000, 1000000)
-    app = utils.to_df_pickle(df=app, path='../input', fname='clean_application_train_test')
+    app['CODE_GENDER'].replace('XNA', 'F', inplace=True)
+
+    cat_cols = get_categorical_features(data=app, ignore=[])
+    for col in cat_cols:
+        app[col].fillna('XNA', inplace=True)
+
+    ' revo '
+    amt_list = ['AMT_ANNUITY', 'AMT_CREDIT', 'AMT_GOODS_PRICE']
+    for col in amt_list:
+        app[f'revo_{col}'] = app[col].where(app[f'NAME_CONTRACT_TYPE']==revo, np.nan)
+
+    utils.to_df_pickle(df=app, path='../input', fname='clean_application_train_test')
+
 
 def clean_bureau():
     logger.info(f'''
@@ -88,7 +108,7 @@ def clean_bureau():
     bur = utils.to_df_pickle(df=bur, path='../input', fname='clean_bureau')
 
 
-def clean_prev():
+def clean_prev(pre):
     logger.info(f'''
     #==============================================================================
     # PREV CLEANSING
@@ -120,18 +140,62 @@ def clean_prev():
             continue
         pre[f'revo_{col}'] = pre[col].where(pre[f'NAME_CONTRACT_TYPE']==revo, np.nan)
 
+    pre['NAME_TYPE_SUITE'].fillna('XNA', inplace=True)
+    pre['PRODUCT_COMBINATION'].fillna('XNA', inplace=True)
+
     pre = utils.to_df_pickle(df=pre, path='../input', fname='clean_prev')
 
 
-pre = utils.read_df_pickle(path='../input/clean_bureau*.p')
-print(pre.head())
-sys.exit()
-pre_eda = eda.df_info(pre)
-pre_eda.to_csv('../eda/pre_eda_after.csv')
-sys.exit()
+def clean_pos(df):
+    logger.info(f'''
+    #==============================================================================
+    # PREV CLEANSING
+    #==============================================================================''')
 
-ins = utils.read_df_pickle(path='../input/install*.p').set_index('SK_ID_CURR')
-ccb = utils.read_df_pickle(path='../input/credit_*.p').set_index('SK_ID_CURR')
-pos = utils.read_df_pickle(path='../input/POS*.p').set_index('SK_ID_CURR')
+    df = df.query("NAME_CONTRACT_STATUS!='Signed' and NAME_CONTRACT_STATUS!='Approved' and NAME_CONTRACT_STATUS!='XNA'")
+    df.loc[(df.NAME_CONTRACT_STATUS=='Completed') & (df.CNT_INSTALMENT_FUTURE!=0), 'NAME_CONTRACT_STATUS'] = 'Active'
+
+    df_0 = df.query('CNT_INSTALMENT_FUTURE==0')
+    df_1 = df.query('CNT_INSTALMENT_FUTURE>0')
+    df_0['NAME_CONTRACT_STATUS'] = 'Completed'
+    df_0.sort_values(by=['SK_ID_PREV', 'MONTHS_BALANCE'], ascending=[True, False], inplace=True)
+    df_0.drop_duplicates('SK_ID_PREV', keep='last', inplace=True)
+    df = pd.concat([df_0, df_1], ignore_index=True)
+    del df_0, df_1
+    gc.collect()
+
+    utils.to_df_pickle(df=df, path='../input', fname='clean_pos')
+
+
+def clean_ins(df):
+
+    df = df.query("AMT_INSTALMENT>0")
+
+    utils.to_df_pickle(df=df, path='../input', fname='clean_install')
+
+
+def clean_ccb(df):
+
+    amt_cols = [col for col in df.columns if col.count('AMT')]
+    cnt_cols = [col for col in df.columns if col.count('CNT')]
+    amt_cnt_cols = list(set(amt_cols+cnt_cols))
+    for col in amt_cnt_cols:
+        df[col].fillna(0, inplace=True)
+
+    utils.to_df_pickle(df=df, path='../input', fname='clean_ccb')
+
+app = utils.read_df_pickle(path='../input/application_train_test*.p').set_index('SK_ID_CURR')
+pre = utils.read_df_pickle(path='../input/previous*.p').set_index('SK_ID_CURR')
+#  ins = utils.read_df_pickle(path='../input/install*.p').set_index('SK_ID_CURR')
+#  ccb = utils.read_df_pickle(path='../input/credit_*.p').set_index('SK_ID_CURR')
+#  pos = utils.read_df_pickle(path='../input/POS*.p').set_index('SK_ID_CURR')
+
+clean_app(app)
+clean_prev(pre)
+#  clean_pos(pos)
+#  clean_ins(ins)
+#  clean_ccb(ccb)
 
 utils.end(sys.argv[0])
+
+#  pre_eda = eda.df_info(pre)
