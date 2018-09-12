@@ -5,6 +5,7 @@ __pycache__/
 
 
 *.p
+*.fp
 *.pickle
 *.pkl
 *.csv
