@@ -158,9 +158,8 @@ def main():
         for cat in cat_list:
             for value in num_list:
                 for method in method_list:
-                    select_category_value_agg(base, df=df, key=key, category_col=cat, value=value, method, ignore_list, prefix)
-                    #  arg_list.append(base, df, key, cat, value,
-                                    method, ignore_list, prefix)
+                    select_category_value_agg(base, df=df, key=key, category_col=cat, value=value, method=method, ignore_list=ignore_list, prefix=prefix)
+                    #  arg_list.append(base, df, key, cat, value, method, ignore_list, prefix)
 
         #  pararell_process(select_cat_wrapper, arg_list)
 
