@@ -68,7 +68,8 @@ def main():
         make_raw_feature(df, prefix, ignore_list=ignore_list)
     elif agg_code == 'tgec':
         cat_list = get_categorical_features(df=df, ignore=ignore_list)
-        enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3', target]
+        #  enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3', target]
+        enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3']
         for enc_feat in enc_feat_list:
             for cat in cat_list:
                 target_encoding(logger=logger, base=base, df=df, key=key, level=cat, target=target, enc_feat=enc_feat, prefix=prefix, ignore_list=ignore_list)
