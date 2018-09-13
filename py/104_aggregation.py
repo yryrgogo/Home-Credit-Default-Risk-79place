@@ -54,9 +54,8 @@ def main():
     #  df = utils.read_df_pickle(path=path)
     path = f'../input/{sys.argv[1]}*'
     prefix = sys.argv[2]
-    #  enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3', target]
+    enc_feat_list = ['EXT_SOURCE_1', target]
     #  enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3']
-    enc_feat_list = [target]
     base = pd.read_csv('../input/base.csv')[[key, target]]
     df = utils.read_df_pickle(path=path)
     gc.collect()
@@ -73,7 +72,10 @@ def main():
         app = utils.read_df_pickle(path='../input/add_clean_app*')[[key] + enc_feat_list]
         cat_list = get_categorical_features(df=df, ignore=ignore_list)
         for enc_feat in enc_feat_list:
-            base = base[key].to_frame().merge(app[[key, enc_feat]], on=key, how='inner')
+            if enc_feat.count(target):
+                base = base[key].to_frame().merge(app[[key, enc_feat]], on=key, how='inner')
+            else:
+                base = base[key].to_frame().merge(app[[key, enc_feat, target]], on=key, how='inner')
             for cat in cat_list:
                 target_encoding(logger=logger, base=base, df=df, key=key, level=cat, target=target, enc_feat=enc_feat, prefix=prefix, ignore_list=ignore_list)
     elif agg_code == 'caliculate':
