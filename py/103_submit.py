@@ -15,7 +15,8 @@ pd.set_option('max_rows', 200)
 
 
 def main():
-    file_path = '../submit/20180911_074_submit_lgb_rate0.02_1138features_CV0.8029377226175965_LB_early150_iter20000.csv'
+    submit = sys.argv[1]
+    file_path = submit
     utils.submit(file_path=file_path)
 
 

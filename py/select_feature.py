@@ -18,7 +18,7 @@ def move_to_second_valid(best_select=[], rank=0, key_list=[]):
 
     if len(best_select)==0:
         #  best_select = pd.read_csv('../output/use_feature/feature869_importance_auc0.806809193200456.csv')
-        best_select = pd.read_csv('../output/cv_feature2868_importances_auc_0.7935637588291089.csv')
+        best_select = pd.read_csv('../output/cv_feature2715_importances_auc_0.7936289854001771.csv')
         #  best_select = pd.read_csv('../output/cv_feature1330_importances_auc_0.8066523340763816.csv')
         #  best_select = pd.read_csv('../output/cv_feature1099_importances_auc_0.8072030486159842.csv')
         #  best_feature = best_select['feature'].values
@@ -26,7 +26,7 @@ def move_to_second_valid(best_select=[], rank=0, key_list=[]):
         #  best_feature = best_select.query("rank<=50")['feature'].values
         #  best_feature = best_select.query("rank>=750")['feature'].values
         #  best_feature = best_select.query("rank>=100")['feature'].values
-        best_feature = best_select.query("rank>=2700")['feature'].values
+        best_feature = best_select.query("rank>=2000")['feature'].values
         #  best_feature = best_select.query("rank>=1300")['feature'].values
         #  best_feature = best_select.query("rank>=1047")['feature'].values
         #  best_feature = [col for col in best_feature if (col.count('a_') and col.count('AMT')) or col.count('p_Ap') or col.count('is_rm')]
@@ -43,7 +43,7 @@ def move_to_second_valid(best_select=[], rank=0, key_list=[]):
         for feature in best_feature:
             if feature not in ignore_features:
                 try:
-                    shutil.move(f'../features/3_winner/{feature}.fp.gz', '../features/2_second_valid/')
+                    shutil.move(f'../features/4_winner/{feature}.fp.gz', '../features/2_second_valid/')
                     #  shutil.move(f'../features/go_dima/{feature}.npy', '../features/1_second_valid/')
                 except FileNotFoundError:
                     print(f'FileNotFound. : {feature}.fp')
@@ -98,6 +98,15 @@ def move_to_use():
         #  for dima in dima_list:
         #      if filename.count(dima):
         #          shutil.move(path, '../features/dima_tmp/')
+
+
+def move_feature(feature_name, move_path='../features/9_delete'):
+
+    try:
+        shutil.move(f'../features/4_winner/{feature_name}.fp.gz', move_path)
+    except FileNotFoundError:
+        print(f'FileNotFound. : {feature_name}.fp.gz')
+        pass
 
 
 

@@ -72,7 +72,7 @@ def main():
     #  data = data.merge(base, on=key, how='inner')
 
     base = pd.read_csv('../input/base.csv')[[key, target]]
-    path = f'../features/3_winner/*'
+    path = f'../features/4_winner/*'
     #  path = f'../features/dima/*.npy'
     #  path = f'../features/go_dima/*.npy'
     data = make_feature_set(base, path)
@@ -125,7 +125,7 @@ def main():
         utils.to_pickle(path=f"../stack/{start_time[:12]}_{stack_name}_{model_type}_CV{str(score).replace('.', '-')}_{feature_num}features.fp", obj=result_stack)
         #  result_stack.to_csv(f'../output/{start_time[:12]}_stack_{model_type}_rate{learning_rate}_{feature_num}features_CV{score_avg}_LB_early{early_stopping_rounds}_iter{num_iterations}.csv', index=False)
         logger.info(f'result_stack shape: {result_stack.shape}')
-    logger.info(f'FEATURE IMPORTANCE: {HOME}/kaggle/kaggle_private/home-credit-default-risk/output/cv_feature{feature_num}_importances_auc_{score}.csv')
+    logger.info(f'FEATURE IMPORTANCE: {HOME}/kaggle/home-credit-default-risk/output/cv_feature{feature_num}_importances_auc_{score}.csv')
 
 
 if __name__ == '__main__':

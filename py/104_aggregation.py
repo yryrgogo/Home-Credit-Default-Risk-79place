@@ -41,21 +41,22 @@ base = pd.read_csv('../input/base.csv')[[key, target]]
 # ===========================================================================
 # 集計方法を選択
 # ===========================================================================
-agg_code = ['base', 'raw', 'caliculate', 'cnt', 'category', 'combi', 'dummie'][2]
+agg_code = ['base', 'raw', 'tgec', 'caliculate', 'cnt', 'category', 'combi', 'dummie'][2]
 diff = [True, False][0]
 div = [True, False][0]
 pro = [True, False][0]
 method_list = ['sum', 'mean', 'var', 'max', 'min']
-
 #  path_list = glob.glob('../features/1_first_valid/*.gz')
 
 
 def main():
 
+    #  path = f'../input/add_clean_app*'
+    #  prefix = 'app_'
+    #  df = utils.read_df_pickle(path=path)
     path = f'../input/{sys.argv[1]}*'
+    prefix = sys.argv[2]
     df = utils.read_df_pickle(path=path)
-    #  prefix = sys.argv[2]
-    prefix = 'app_'
 
     '''
     BASE AGGRIGATION
