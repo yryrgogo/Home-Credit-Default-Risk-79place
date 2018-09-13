@@ -18,12 +18,11 @@ logger = logger_func()
 pd.set_option('max_columns', 200)
 pd.set_option('max_rows', 200)
 from preprocessing import set_validation, split_dataset, get_dummies, factorize_categoricals
-from feature_engineering import base_aggregation, diff_feature, division_feature, product_feature, cnt_encoding, select_category_value_agg, exclude_feature
+from feature_engineering import base_aggregation, diff_feature, division_feature, product_feature, cnt_encoding, select_category_value_agg, exclude_feature, target_encoding
 from make_file import make_npy, make_feature_set, make_raw_feature
 
 
 start_time = "{0:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
-
 
 # ===========================================================================
 # global variables
@@ -53,8 +52,7 @@ method_list = ['sum', 'mean', 'var', 'max', 'min']
 
 def main():
 
-    #  path = f'../input/{sys.argv[1]}*'
-    path = f'../input/add_clean_app*'
+    path = f'../input/{sys.argv[1]}*'
     df = utils.read_df_pickle(path=path)
     #  prefix = sys.argv[2]
     prefix = 'app_'
@@ -67,6 +65,12 @@ def main():
         one_base_agg(df=df, prefix=prefix)
     elif agg_code == 'raw':
         make_raw_feature(df, prefix, ignore_list=ignore_list)
+    elif agg_code == 'tgec':
+        cat_list = get_categorical_features(df=df, ignore=ignore_list)
+        enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3', target]
+        for enc_feat in enc_feat_list:
+            for cat in cat_list:
+                target_encoding(logger=logger, base=base, df=df, key=key, level=cat, target=target, enc_feat=enc_feat, prefix=prefix, ignore_list=ignore_list)
     elif agg_code == 'caliculate':
         df = two_calicurate(df=df)
         if prefix!='app_':
@@ -76,9 +80,9 @@ def main():
                 file_path = f'{prefix}{col}.fp'
                 utils.to_pkl_gzip(obj=df[col].values, path=f"{dir}/{prefix}{col}.fp")
                 logger.info(f'''
-                #========================================================================
-                # COMPLETE MAKE FEATURE : {file_path}
-                #========================================================================''')
+#========================================================================
+# COMPLETE MAKE CALICURATE FEATURE : {file_path}
+#========================================================================''')
 
     elif agg_code == 'cnt':
         '''
