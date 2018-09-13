@@ -35,8 +35,6 @@ ignore_list = [key, target, 'SK_ID_BUREAU', 'SK_ID_PREV']
 # ===========================================================================
 # DATA LOAD
 # ===========================================================================
-base = pd.read_csv('../input/base.csv')[[key, target]]
-#  base = pd.read_csv( '../../../kaggle/kaggle_private/home-credit-default-risk/data/base.csv')
 
 # ===========================================================================
 # 集計方法を選択
@@ -56,7 +54,12 @@ def main():
     #  df = utils.read_df_pickle(path=path)
     path = f'../input/{sys.argv[1]}*'
     prefix = sys.argv[2]
+    #  enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3', target]
+    #  enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3']
+    enc_feat_list = [target]
+    base = pd.read_csv('../input/base.csv')[[key, target]]
     df = utils.read_df_pickle(path=path)
+    gc.collect()
 
     '''
     BASE AGGRIGATION
@@ -67,10 +70,10 @@ def main():
     elif agg_code == 'raw':
         make_raw_feature(df, prefix, ignore_list=ignore_list)
     elif agg_code == 'tgec':
+        app = utils.read_df_pickle(path='../input/add_clean_app*')[[key] + enc_feat_list]
         cat_list = get_categorical_features(df=df, ignore=ignore_list)
-        #  enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3', target]
-        enc_feat_list = ['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3']
         for enc_feat in enc_feat_list:
+            base = base[key].to_frame().merge(app[[key, enc_feat]], on=key, how='inner')
             for cat in cat_list:
                 target_encoding(logger=logger, base=base, df=df, key=key, level=cat, target=target, enc_feat=enc_feat, prefix=prefix, ignore_list=ignore_list)
     elif agg_code == 'caliculate':
