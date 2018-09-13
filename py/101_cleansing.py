@@ -6,14 +6,17 @@ import re
 from glob import glob
 import os
 HOME = os.path.expanduser('~')
-#  sys.path.append(f"{HOME}/kaggle/github/library/")
-sys.path.append(f"/mnt/c/Git/go/kaggle/github/library/")
+sys.path.append(f"{HOME}/kaggle/github/library/")
+#  sys.path.append(f"/mnt/c/Git/go/kaggle/github/library/")
 import utils
-from logger import logger_func
+from utils import logger_func
 logger = logger_func()
 import eda
-from convinience_function import get_categorical_features
+from utils import get_categorical_features
 
+
+key = 'SK_ID_CURR'
+target = 'TARGET'
 
 #==============================================================================
 # pickleにする 
@@ -184,11 +187,19 @@ def clean_ccb(df):
 
     utils.to_df_pickle(df=df, path='../input', fname='clean_ccb')
 
-app = utils.read_df_pickle(path='../input/application_train_test*.p').set_index('SK_ID_CURR')
-pre = utils.read_df_pickle(path='../input/previous*.p').set_index('SK_ID_CURR')
-#  ins = utils.read_df_pickle(path='../input/install*.p').set_index('SK_ID_CURR')
-#  ccb = utils.read_df_pickle(path='../input/credit_*.p').set_index('SK_ID_CURR')
-#  pos = utils.read_df_pickle(path='../input/POS*.p').set_index('SK_ID_CURR')
+#  app = utils.read_df_pickle(path='../input/application_train_test*.p').set_index('SK_ID_CURR')
+#  bur = utils.read_df_pickle(path='../input/add_clean_bur*.p')
+#  pre = utils.read_df_pickle(path='../input/add_clean_pre*.p')
+#  ccb = utils.read_df_pickle(path='../input/add_clean_ccb*.p')
+ins = utils.read_df_pickle(path='../input/add_clean_ins*.p')
+pos = utils.read_df_pickle(path='../input/add_clean_pos*.p')
+ins.drop(target, axis=1, inplace=True)
+pos.drop(target, axis=1, inplace=True)
+
+utils.to_df_pickle(df=pos, path='../input', fname='add_clean_pos')
+utils.to_df_pickle(df=ins, path='../input', fname='add_clean_ins')
+sys.exit()
+
 
 clean_app(app)
 clean_prev(pre)
