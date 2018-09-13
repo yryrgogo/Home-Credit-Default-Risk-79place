@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-
+# kaggle
 *.gz
 *.p
 *.fp
@@ -14,6 +14,10 @@ __pycache__/
 *.xlsx
 *.twb
 *.twbx
+features/
+input/
+output/
+stack/
 
 # C extensions
 *.so
