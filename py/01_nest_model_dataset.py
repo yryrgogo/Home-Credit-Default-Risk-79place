@@ -33,3 +33,5 @@ test = test.merge(app, on=key, how='inner')
 
 for col in train.columns:
     print(col)
+
+    utils.to_pkl_gzip(obj=train[col], path='../features/1_first_valid/train_{col}')
