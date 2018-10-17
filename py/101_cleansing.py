@@ -83,10 +83,10 @@ def clean_app(app):
     drop_list = [col for col in app.columns if col.count('is_train') or col.count('is_test') or col.count('valid_no')]
     app.drop(drop_list, axis=1, inplace=True)
 
-    app['AMT_INCOME_TOTAL'] = app['AMT_INCOME_TOTAL'].where(app['AMT_INCOME_TOTAL']<1000000, 1000000)
+    #  app['AMT_INCOME_TOTAL'] = app['AMT_INCOME_TOTAL'].where(app['AMT_INCOME_TOTAL']<1000000, 1000000)
     app['CODE_GENDER'].replace('XNA', 'F', inplace=True)
 
-    cat_cols = get_categorical_features(data=app, ignore=[])
+    cat_cols = get_categorical_features(df=app, ignore_list=[])
     for col in cat_cols:
         app[col].fillna('XNA', inplace=True)
 
@@ -94,6 +94,7 @@ def clean_app(app):
     amt_list = ['AMT_ANNUITY', 'AMT_CREDIT', 'AMT_GOODS_PRICE']
     for col in amt_list:
         app[f'revo_{col}'] = app[col].where(app[f'NAME_CONTRACT_TYPE']==revo, np.nan)
+        app[col] = app[col].where(app[f'NAME_CONTRACT_TYPE']!=revo, np.nan)
 
     utils.to_df_pickle(df=app, path='../input', fname='clean_application_train_test')
 
@@ -133,7 +134,7 @@ def clean_prev(pre):
     pre['DAYS_LAST_DUE_1ST_VERSION'] = pre['DAYS_LAST_DUE_1ST_VERSION'].where(pre['DAYS_LAST_DUE_1ST_VERSION'] <100000, np.nan)
     pre['DAYS_LAST_DUE']             = pre['DAYS_LAST_DUE'].where(pre['DAYS_LAST_DUE']           <100000, np.nan)
     pre['DAYS_TERMINATION']          = pre['DAYS_TERMINATION'].where(pre['DAYS_TERMINATION']     <100000, np.nan)
-    pre['SELLERPLACE_AREA']          = pre['SELLERPLACE_AREA'].where(pre['SELLERPLACE_AREA']     <200, 200)
+    #  pre['SELLERPLACE_AREA']          = pre['SELLERPLACE_AREA'].where(pre['SELLERPLACE_AREA']     <200, 200)
 
     ignore_list = ['SK_ID_CURR', 'SK_ID_PREV', 'NAME_CONTRACT_TYPE', 'NAME_CONTRACT_STATUS']
     ' revo '
@@ -142,6 +143,7 @@ def clean_prev(pre):
             logger.info(f'CONTINUE: {col}')
             continue
         pre[f'revo_{col}'] = pre[col].where(pre[f'NAME_CONTRACT_TYPE']==revo, np.nan)
+        pre[col] = pre[col].where(pre[f'NAME_CONTRACT_TYPE']!=revo, np.nan)
 
     pre['NAME_TYPE_SUITE'].fillna('XNA', inplace=True)
     pre['PRODUCT_COMBINATION'].fillna('XNA', inplace=True)
@@ -187,25 +189,30 @@ def clean_ccb(df):
 
     utils.to_df_pickle(df=df, path='../input', fname='clean_ccb')
 
-#  app = utils.read_df_pickle(path='../input/application_train_test*.p').set_index('SK_ID_CURR')
-#  bur = utils.read_df_pickle(path='../input/add_clean_bur*.p')
-#  pre = utils.read_df_pickle(path='../input/add_clean_pre*.p')
-#  ccb = utils.read_df_pickle(path='../input/add_clean_ccb*.p')
-ins = utils.read_df_pickle(path='../input/add_clean_ins*.p')
-pos = utils.read_df_pickle(path='../input/add_clean_pos*.p')
-ins.drop(target, axis=1, inplace=True)
-pos.drop(target, axis=1, inplace=True)
-
-utils.to_df_pickle(df=pos, path='../input', fname='add_clean_pos')
-utils.to_df_pickle(df=ins, path='../input', fname='add_clean_ins')
-sys.exit()
-
-
+app = utils.read_df_pickle(path='../input/application_train_test*.p')
 clean_app(app)
+del app
+gc.collect()
+bur = utils.read_df_pickle(path='../input/bureau*.p')
+clean_prev(bur)
+del bur
+gc.collect()
+pre = utils.read_df_pickle(path='../input/prev*.p')
 clean_prev(pre)
-#  clean_pos(pos)
-#  clean_ins(ins)
-#  clean_ccb(ccb)
+del pre
+gc.collect()
+pos = utils.read_df_pickle(path='../input/POS*.p')
+clean_pos(pos)
+del pos
+gc.collect()
+ins = utils.read_df_pickle(path='../input/install*.p')
+clean_ins(ins)
+del ins
+gc.collect()
+ccb = utils.read_df_pickle(path='../input/credit*.p')
+clean_ccb(ccb)
+del ccb
+gc.collect()
 
 utils.end(sys.argv[0])
 
