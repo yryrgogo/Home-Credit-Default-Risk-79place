@@ -14,43 +14,41 @@ logger = logger_func()
 import eda
 from utils import get_categorical_features
 
-
 key = 'SK_ID_CURR'
 target = 'TARGET'
-
 #==============================================================================
-# pickleにする 
+# pklにする 
 #==============================================================================
 
 def make_pkl():
     app = pd.read_csv('../input/application_train_test.csv')
-    utils.to_df_pickle(df=app, path='../input', fname='application_train_test')
+    utils.to_df_pkl(df=app, path='../input', fname='application_train_test')
 
     bureau = pd.read_csv('../input/bureau.csv')
-    utils.to_df_pickle(df=bureau, path='../input', fname='bureau')
+    utils.to_df_pkl(df=bureau, path='../input', fname='bureau')
 
     prev = pd.read_csv('../input/previous_application.csv')
-    utils.to_df_pickle(df=prev, path='../input', fname='previous_application')
+    utils.to_df_pkl(df=prev, path='../input', fname='previous_application')
 
     inst = pd.read_csv('../input/installments_payments.csv')
-    utils.to_df_pickle(df=inst, path='../input', fname='installments_payments')
+    utils.to_df_pkl(df=inst, path='../input', fname='installments_payments')
 
     ccb = pd.read_csv('../input/credit_card_balance.csv')
-    utils.to_df_pickle(df=ccb, path='../input', fname='credit_card_balance')
+    utils.to_df_pkl(df=ccb, path='../input', fname='credit_card_balance')
 
     pos = pd.read_csv('../input/POS_CASH_balance.csv')
-    utils.to_df_pickle(df=pos, path='../input', fname='POS_CASH_balance')
+    utils.to_df_pkl(df=pos, path='../input', fname='POS_CASH_balance')
 
 #  make_pkl()
 
 # DATA LOAD
 #  utils.start(sys.argv[0])
-#  app = utils.read_df_pickle(path='../input/application*.p').set_index('SK_ID_CURR')
-#  bur = utils.read_df_pickle(path='../input/bureau*.p').set_index('SK_ID_CURR')
-#  pre = utils.read_df_pickle(path='../input/previous*.p').set_index('SK_ID_CURR')
-#  ins = utils.read_df_pickle(path='../input/install*.p').set_index('SK_ID_CURR')
-#  ccb = utils.read_df_pickle(path='../input/credit_*.p').set_index('SK_ID_CURR')
-#  pos = utils.read_df_pickle(path='../input/POS*.p').set_index('SK_ID_CURR')
+#  app = utils.read_df_pkl(path='../input/application*.p').set_index('SK_ID_CURR')
+#  bur = utils.read_df_pkl(path='../input/bureau*.p').set_index('SK_ID_CURR')
+#  pre = utils.read_df_pkl(path='../input/previous*.p').set_index('SK_ID_CURR')
+#  ins = utils.read_df_pkl(path='../input/install*.p').set_index('SK_ID_CURR')
+#  ccb = utils.read_df_pkl(path='../input/credit_*.p').set_index('SK_ID_CURR')
+#  pos = utils.read_df_pkl(path='../input/POS*.p').set_index('SK_ID_CURR')
 #  utils.end(sys.argv[0])
 
 logger.info(f'''
@@ -96,20 +94,20 @@ def clean_app(app):
         app[f'revo_{col}'] = app[col].where(app[f'NAME_CONTRACT_TYPE']==revo, np.nan)
         app[col] = app[col].where(app[f'NAME_CONTRACT_TYPE']!=revo, np.nan)
 
-    utils.to_df_pickle(df=app, path='../input', fname='clean_application_train_test')
+    utils.to_df_pkl(df=app, path='../input', fname='clean_application_train_test')
 
 
-def clean_bureau():
+def clean_bureau(bur):
     logger.info(f'''
     #==============================================================================
     # BUREAU CLEANSING
     #==============================================================================''')
 
-    bur = utils.read_df_pickle(path='../input/bureau*.p')
+    bur = utils.read_df_pkl(path='../input/bureau*.p')
     bur['DAYS_CREDIT_ENDDATE'] = bur['DAYS_CREDIT_ENDDATE'].where(bur['DAYS_CREDIT_ENDDATE']>-36000, np.nan)
     bur['DAYS_ENDDATE_FACT'] = bur['DAYS_ENDDATE_FACT'].where(bur['DAYS_ENDDATE_FACT']>-36000, np.nan)
     bur['DAYS_CREDIT_UPDATE'] = bur['DAYS_CREDIT_UPDATE'].where(bur['DAYS_CREDIT_UPDATE']>-36000, np.nan)
-    bur = utils.to_df_pickle(df=bur, path='../input', fname='clean_bureau')
+    bur = utils.to_df_pkl(df=bur, path='../input', fname='clean_bureau')
 
 
 def clean_prev(pre):
@@ -121,7 +119,7 @@ def clean_prev(pre):
     cash = 'Cash loans'
     revo = 'Revolving loans'
     ' RevolvingではCNT_PAYMENT, AMT系をNULLにする '
-    pre = utils.read_df_pickle(path='../input/previous*.p')
+    pre = utils.read_df_pkl(path='../input/previous*.p')
     pre['AMT_CREDIT'] = pre['AMT_CREDIT'].where(pre['AMT_CREDIT']>0, np.nan)
     pre['AMT_ANNUITY'] = pre['AMT_ANNUITY'].where(pre['AMT_ANNUITY']>0, np.nan)
     pre['AMT_APPLICATION'] = pre['AMT_APPLICATION'].where(pre['AMT_APPLICATION']>0, np.nan)
@@ -148,7 +146,7 @@ def clean_prev(pre):
     pre['NAME_TYPE_SUITE'].fillna('XNA', inplace=True)
     pre['PRODUCT_COMBINATION'].fillna('XNA', inplace=True)
 
-    pre = utils.to_df_pickle(df=pre, path='../input', fname='clean_prev')
+    pre = utils.to_df_pkl(df=pre, path='../input', fname='clean_prev')
 
 
 def clean_pos(df):
@@ -169,14 +167,14 @@ def clean_pos(df):
     del df_0, df_1
     gc.collect()
 
-    utils.to_df_pickle(df=df, path='../input', fname='clean_pos')
+    utils.to_df_pkl(df=df, path='../input', fname='clean_pos')
 
 
 def clean_ins(df):
 
     df = df.query("AMT_INSTALMENT>0")
 
-    utils.to_df_pickle(df=df, path='../input', fname='clean_install')
+    utils.to_df_pkl(df=df, path='../input', fname='clean_install')
 
 
 def clean_ccb(df):
@@ -187,32 +185,32 @@ def clean_ccb(df):
     for col in amt_cnt_cols:
         df[col].fillna(0, inplace=True)
 
-    utils.to_df_pickle(df=df, path='../input', fname='clean_ccb')
+    utils.to_df_pkl(df=df, path='../input', fname='clean_ccb')
 
-app = utils.read_df_pickle(path='../input/application_train_test*.p')
-clean_app(app)
-del app
-gc.collect()
-bur = utils.read_df_pickle(path='../input/bureau*.p')
-clean_prev(bur)
+#  app = utils.read_df_pkl(path='../input/application_train_test*.p')
+#  clean_app(app)
+#  del app
+#  gc.collect()
+bur = utils.read_df_pkl(path='../input/bureau*.p')
+clean_bureau(bur)
 del bur
-gc.collect()
-pre = utils.read_df_pickle(path='../input/prev*.p')
-clean_prev(pre)
-del pre
-gc.collect()
-pos = utils.read_df_pickle(path='../input/POS*.p')
-clean_pos(pos)
-del pos
-gc.collect()
-ins = utils.read_df_pickle(path='../input/install*.p')
-clean_ins(ins)
-del ins
-gc.collect()
-ccb = utils.read_df_pickle(path='../input/credit*.p')
-clean_ccb(ccb)
-del ccb
-gc.collect()
+#  gc.collect()
+#  pre = utils.read_df_pkl(path='../input/prev*.p')
+#  clean_prev(pre)
+#  del pre
+#  gc.collect()
+#  pos = utils.read_df_pkl(path='../input/POS*.p')
+#  clean_pos(pos)
+#  del pos
+#  gc.collect()
+#  ins = utils.read_df_pkl(path='../input/install*.p')
+#  clean_ins(ins)
+#  del ins
+#  gc.collect()
+#  ccb = utils.read_df_pkl(path='../input/credit*.p')
+#  clean_ccb(ccb)
+#  del ccb
+#  gc.collect()
 
 utils.end(sys.argv[0])
 
