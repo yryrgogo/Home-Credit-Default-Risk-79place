@@ -7,7 +7,7 @@ import glob
 
 import os
 HOME = os.path.expanduser('~')
-sys.path.append(f"{HOME}/kaggle/github/library/")
+sys.path.append(f"{HOME}/kaggle/data_analysis/library/")
 import utils
 from utils import logger_func, get_categorical_features, get_numeric_features, pararell_process
 from preprocessing import get_dummies
@@ -21,10 +21,12 @@ from info_home_credit import hcdr_key_cols
 key, target, ignore_list = hcdr_key_cols()
 #========================================================================
 
-train_path = '../input/timediff_train*.p'
-test_path = '../input/timediff_test*.p'
-train = utils.read_df_pickle(path=train_path)
-test = utils.read_df_pickle(path=test_path)
+fname = 'bureau'
+app = utils.read_df_pkl(path='../input/clean_app*.p')[[key, target]]
+df = utils.read_df_pkl(path=f'../input/clean_{fname}*')
+df = df.merge(app, on=key, how='inner')
+train = df[~df[target].isnull()]
+test = df[df[target].isnull()]
 
 def trans_to_dummies():
     global df
@@ -72,7 +74,7 @@ def feature_check(col):
 
 #  trans_to_dummies()
 
-def make_raw_feature(is_train):
+def make_raw_feature(df, is_train):
 
     columns = df.columns
     for col in columns:
@@ -86,5 +88,5 @@ def make_raw_feature(is_train):
         else:
             utils.to_pkl_gzip(obj=value, path=f'../features/4_winner/test_{col}')
 
-make_raw_feature(is_train=True)
-make_raw_feature(is_train=False)
+make_raw_feature(df=train, is_train=True)
+make_raw_feature(df=test, is_train=False)

@@ -5,13 +5,15 @@ import re
 from glob import glob
 import os
 HOME = os.path.expanduser('~')
-sys.path.append(f"{HOME}/kaggle/github/library/")
+sys.path.append(f"{HOME}/kaggle/data_analysis/library/")
 import utils
 from utils import logger_func
 logger = logger_func()
+sys.path.append(f"{HOME}/kaggle/data_analysis/model/")
+from params_lgbm import params_home_credit
+
 pd.set_option('max_columns', 200)
 pd.set_option('max_rows', 200)
-
 
 
 def main():
