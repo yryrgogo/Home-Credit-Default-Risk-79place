@@ -142,7 +142,8 @@ def main():
     if len(submit)>0:
         if stack_name=='add_nest':
             test[target] = result
-            submit[key].to_frame().merge(test.reset_index()[[key, target]], on=key, how='left')
+            test = test.reset_index()[[key, target]].groupby(key)[target].mean().reset_index()
+            submit = submit[key].to_frame().merge(test, on=key, how='left')
             submit[target].fillna(0, inplace=True)
             submit.to_csv(f'../submit/{start_time[4:12]}_submit_{fname}_{model_type}_rate{learning_rate}_{feature_num}features_CV{score}_LB.csv', index=False)
         else:
