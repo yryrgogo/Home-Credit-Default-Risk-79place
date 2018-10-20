@@ -1,7 +1,7 @@
 win_path = f'../features/bureau/*'
 win_path = f'../features/4_winner/*'
 stack_name='add_nest'
-fname='bureau'
+fname='prev'
 #========================================================================
 # argv[1] : model_type 
 # argv[2] : learning_rate
@@ -109,7 +109,7 @@ def main():
         'num_boost_round' : num_boost_round,
         'metric' : metric,
         'judge_flg' : judge_flg,
-        'model_type' : model_type,
+        'model_type' : model_type+'_'+fname,
         'dummie' : dummie,
         'ignore_list' : ignore_list
     }
