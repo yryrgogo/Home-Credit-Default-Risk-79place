@@ -2,12 +2,9 @@ import gc
 import numpy as np
 import pandas as pd
 import sys
-import re
-from glob import glob
 import os
 HOME = os.path.expanduser('~')
-sys.path.append(f"{HOME}/kaggle/github/library/")
-#  sys.path.append(f"/mnt/c/Git/go/kaggle/github/library/")
+sys.path.append(f"{HOME}/kaggle/data_analysis/library/")
 import utils
 from utils import logger_func
 logger = logger_func()
@@ -16,12 +13,14 @@ from utils import get_categorical_features
 
 key = 'SK_ID_CURR'
 target = 'TARGET'
-#==============================================================================
-# pklにする 
-#==============================================================================
 
+#==============================================================================
+# to pickle
+#==============================================================================
 def make_pkl():
-    app = pd.read_csv('../input/application_train_test.csv')
+    app_train = pd.read_csv('../input/application_train.csv')
+    app_test = pd.read_csv('../input/application_test.csv')
+    app = pd.concat([app_train, app_test], axis=0)
     utils.to_df_pkl(df=app, path='../input', fname='application_train_test')
 
     bureau = pd.read_csv('../input/bureau.csv')
