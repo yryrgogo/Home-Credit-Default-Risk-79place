@@ -37,9 +37,10 @@ import glob
 import os
 HOME = os.path.expanduser('~')
 
-sys.path.append(f'{HOME}/kaggle/data_analysis/model/')
+sys.path.append(f'{HOME}/kaggle/data_analysis/model')
 from params_lgbm import xgb_params_0814, params_home_credit
-from lightgbm_ex import lightgbm_ex as lgb_ex
+sys.path.append(f'{HOME}/kaggle/data_analysis')
+from model.lightgbm_ex import lightgbm_ex as lgb_ex
 
 sys.path.append(f"{HOME}/kaggle/data_analysis/library/")
 import utils
@@ -101,7 +102,7 @@ def main():
     #========================================================================
     # Train & Prediction Start
     #========================================================================
-    LGBM.cross_prediction(
+    LGBM = LGBM.cross_prediction(
         train=train
         ,test=test
         ,key=key
@@ -114,6 +115,19 @@ def main():
         ,early_stopping_rounds=early_stopping_rounds
         ,oof_flg=oof_flg
     )
+
+    #  utils.mkdir_func('../model')
+    #  import pickle
+    #  with open(f'../model/{start_time[4:12]}_{model_type}_{fname}.pkl', 'wb') as m:
+    #      pickle.dump(obj=LGBM.fold_model_list, file=m)
+    #  sys.exit()
+
+    for fold_num in range(fold):
+        LGBM.xray(
+            fold_num=fold_num
+            ,base_xray=train
+        )
+
     cv_score = LGBM.cv_score
     result = LGBM.prediction
     cv_feim = LGBM.cv_feim
