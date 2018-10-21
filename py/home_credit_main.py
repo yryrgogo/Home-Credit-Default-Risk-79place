@@ -123,10 +123,12 @@ def main():
     #  sys.exit()
 
     for fold_num in range(fold):
-        LGBM.xray(
+        tmp_xray = LGBM.xray(
             fold_num=fold_num
             ,base_xray=train
         )
+        tmp_xray.to_csv('../output/xray.csv')
+        sys.exit()
 
     cv_score = LGBM.cv_score
     result = LGBM.prediction

@@ -38,7 +38,7 @@ def to_pkl():
     pos = pd.read_csv('../input/POS_CASH_balance.csv')
     utils.to_df_pkl(df=pos, path='../input', fname='POS_CASH_balance')
 
-#  make_pkl()
+#  to_pkl()
 
 # DATA LOAD
 #  utils.start(sys.argv[0])
