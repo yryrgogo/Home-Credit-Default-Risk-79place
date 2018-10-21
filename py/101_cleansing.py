@@ -17,7 +17,7 @@ target = 'TARGET'
 #==============================================================================
 # to pickle
 #==============================================================================
-def make_pkl():
+def to_pkl():
     app_train = pd.read_csv('../input/application_train.csv')
     app_test = pd.read_csv('../input/application_test.csv')
     app = pd.concat([app_train, app_test], axis=0)
@@ -69,18 +69,19 @@ logger.info(f'''
 
 utils.start(sys.argv[0])
 
-
+#========================================================================
+# CLEANSING & PROCESSING
+#========================================================================
 def clean_app(app):
     logger.info(f'''
     #==============================================================================
-    # APPLICATION CLEANSING
+    # APPLICATION
     #==============================================================================''')
 
     revo = 'Revolving loans'
     drop_list = [col for col in app.columns if col.count('is_train') or col.count('is_test') or col.count('valid_no')]
     app.drop(drop_list, axis=1, inplace=True)
 
-    #  app['AMT_INCOME_TOTAL'] = app['AMT_INCOME_TOTAL'].where(app['AMT_INCOME_TOTAL']<1000000, 1000000)
     app['CODE_GENDER'].replace('XNA', 'F', inplace=True)
 
     cat_cols = get_categorical_features(df=app, ignore_list=[])
@@ -148,43 +149,43 @@ def clean_prev(pre):
     pre = utils.to_df_pkl(df=pre, path='../input', fname='clean_prev')
 
 
-def clean_pos(df):
+def clean_pos(pos):
     logger.info(f'''
     #==============================================================================
     # PREV CLEANSING
     #==============================================================================''')
 
-    df = df.query("NAME_CONTRACT_STATUS!='Signed' and NAME_CONTRACT_STATUS!='Approved' and NAME_CONTRACT_STATUS!='XNA'")
-    df.loc[(df.NAME_CONTRACT_STATUS=='Completed') & (df.CNT_INSTALMENT_FUTURE!=0), 'NAME_CONTRACT_STATUS'] = 'Active'
+    pos = pos.query("NAME_CONTRACT_STATUS!='Signed' and NAME_CONTRACT_STATUS!='Approved' and NAME_CONTRACT_STATUS!='XNA'")
+    pos.loc[(pos.NAME_CONTRACT_STATUS=='Completed') & (pos.CNT_INSTALMENT_FUTURE!=0), 'NAME_CONTRACT_STATUS'] = 'Active'
 
-    df_0 = df.query('CNT_INSTALMENT_FUTURE==0')
-    df_1 = df.query('CNT_INSTALMENT_FUTURE>0')
-    df_0['NAME_CONTRACT_STATUS'] = 'Completed'
-    df_0.sort_values(by=['SK_ID_PREV', 'MONTHS_BALANCE'], ascending=[True, False], inplace=True)
-    df_0.drop_duplicates('SK_ID_PREV', keep='last', inplace=True)
-    df = pd.concat([df_0, df_1], ignore_index=True)
-    del df_0, df_1
+    pos_0 = pos.query('CNT_INSTALMENT_FUTURE==0')
+    pos_1 = pos.query('CNT_INSTALMENT_FUTURE>0')
+    pos_0['NAME_CONTRACT_STATUS'] = 'Completed'
+    pos_0.sort_values(by=['SK_ID_PREV', 'MONTHS_BALANCE'], ascending=[True, False], inplace=True)
+    pos_0.drop_duplicates('SK_ID_PREV', keep='last', inplace=True)
+    pos = pd.concat([pos_0, pos_1], ignore_index=True)
+    del pos_0, pos_1
     gc.collect()
 
-    utils.to_df_pkl(df=df, path='../input', fname='clean_pos')
+    utils.to_df_pkl(df=pos, path='../input', fname='clean_pos')
 
 
-def clean_ins(df):
+def clean_ins(ins):
 
-    df = df.query("AMT_INSTALMENT>0")
+    ins = ins.query("AMT_INSTALMENT>0")
 
-    utils.to_df_pkl(df=df, path='../input', fname='clean_install')
+    utils.to_df_pkl(df=ins, path='../input', fname='clean_install')
 
 
-def clean_ccb(df):
+def clean_ccb(ccb):
 
-    amt_cols = [col for col in df.columns if col.count('AMT')]
-    cnt_cols = [col for col in df.columns if col.count('CNT')]
+    amt_cols = [col for col in ccb.columns if col.count('AMT')]
+    cnt_cols = [col for col in ccb.columns if col.count('CNT')]
     amt_cnt_cols = list(set(amt_cols+cnt_cols))
     for col in amt_cnt_cols:
-        df[col].fillna(0, inplace=True)
+        ccb[col].fillna(0, inplace=True)
 
-    utils.to_df_pkl(df=df, path='../input', fname='clean_ccb')
+    utils.to_df_pkl(df=ccb, path='../input', fname='clean_ccb')
 
 #  app = utils.read_df_pkl(path='../input/application_train_test*.p')
 #  clean_app(app)
