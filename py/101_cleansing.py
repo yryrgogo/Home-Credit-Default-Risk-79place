@@ -17,7 +17,7 @@ target = 'TARGET'
 #==============================================================================
 # to pickle
 #==============================================================================
-def make_pkl():
+def to_pkl():
     app_train = pd.read_csv('../input/application_train.csv')
     app_test = pd.read_csv('../input/application_test.csv')
     app = pd.concat([app_train, app_test], axis=0)
@@ -38,7 +38,7 @@ def make_pkl():
     pos = pd.read_csv('../input/POS_CASH_balance.csv')
     utils.to_df_pkl(df=pos, path='../input', fname='POS_CASH_balance')
 
-#  make_pkl()
+#  to_pkl()
 
 # DATA LOAD
 #  utils.start(sys.argv[0])
