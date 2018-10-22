@@ -39,6 +39,7 @@ HOME = os.path.expanduser('~')
 
 sys.path.append(f'{HOME}/kaggle/data_analysis/model')
 from params_lgbm import xgb_params_0814, params_home_credit
+from xray_wrapper import Xray_Cal
 sys.path.append(f'{HOME}/kaggle/data_analysis')
 from model.lightgbm_ex import lightgbm_ex as lgb_ex
 
@@ -62,7 +63,6 @@ start_time = "{0:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
 key = 'SK_ID_CURR'
 target = 'TARGET'
 ignore_list = [key, 'SK_ID_BUREAU', 'SK_ID_PREV', target]
-
 
 def main():
 
@@ -123,10 +123,12 @@ def main():
     #  sys.exit()
 
     for fold_num in range(fold):
-        tmp_xray = LGBM.xray(
-            fold_num=fold_num
-            ,base_xray=train
-        )
+        model = LGBM.fold_model_list[fold_num]
+        tmp_xray = Xray_Cal(ignore_list=ignore_list, model=model).get_xray(base_xray=train)
+        #  tmp_xray = LGBM.xray(
+        #      fold_num=fold_num
+        #      ,base_xray=train
+        #  )
         tmp_xray.to_csv('../output/xray.csv')
         sys.exit()
 
