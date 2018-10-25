@@ -6,7 +6,7 @@ import re
 from glob import glob
 import os
 HOME = os.path.expanduser('~')
-sys.path.append(f"{HOME}/kaggle/data_analysis/library/")
+sys.path.append(f"{HOME}/kaggle/github/library/")
 #  sys.path.append(f"/mnt/c/Git/go/kaggle/github/library/")
 import utils
 from utils import logger_func
@@ -41,6 +41,6 @@ for fname in fname_list:
     else:
         result = df_eda.copy()
 
-result.to_csv(f'../eda/1018_home_credit_all_eda.csv', index=True)
+result.to_csv(f'../eda/1023_home_credit_all_eda.csv', index=True)
 
 utils.end(sys.argv[0])
