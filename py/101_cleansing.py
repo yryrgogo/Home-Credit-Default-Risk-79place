@@ -14,6 +14,12 @@ from utils import get_categorical_features
 key = 'SK_ID_CURR'
 target = 'TARGET'
 
+
+#  app = utils.read_df_pkl(path='../input/clean_app*.p')
+#  app[target] = app[target].where(app[target]>=0, np.nan)
+#  utils.to_df_pkl(df=app, path='../input', fname='clean_application_train_test')
+#  sys.exit()
+
 #==============================================================================
 # to pickle
 #==============================================================================
