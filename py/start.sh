@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python 103_prepro_dataset.py
+python home_credit_main.py
 
 wait
 sudo shutdown -P

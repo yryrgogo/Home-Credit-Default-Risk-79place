@@ -122,15 +122,38 @@ def main():
     #      pickle.dump(obj=LGBM.fold_model_list, file=m)
     #  sys.exit()
 
+    #========================================================================
+    # X-RAYの計算と出力
+    # Args:
+    #     model      : 学習済のモデル
+    #     train      : モデルの学習に使用したデータセット
+    #     column_list: X-RAYの計算を行うカラムリスト。指定なしの場合、
+    #                  データセットの全カラムについて計算を行うが、
+    #                  計算時間を考えると最大30カラム程度を推奨。
+    #========================================================================
+    train.reset_index(inplace=True)
+    train = train[LGBM.use_cols]
+    result_xray = pd.DataFrame()
+    N_sample = 250000
+    max_point = 30
     for fold_num in range(fold):
         model = LGBM.fold_model_list[fold_num]
-        tmp_xray = Xray_Cal(ignore_list=ignore_list, model=model).get_xray(base_xray=train)
-        #  tmp_xray = LGBM.xray(
-        #      fold_num=fold_num
-        #      ,base_xray=train
-        #  )
-        tmp_xray.to_csv('../output/xray.csv')
-        sys.exit()
+        if fold_num==0:
+            xray_obj = Xray_Cal(logger=logger, ignore_list=ignore_list, model=model)
+        xray_obj, tmp_xray = xray_obj.get_xray(base_xray=train, col_list=train.columns, fold_num=fold_num, N_sample=N_sample, max_point=max_point)
+        tmp_xray.rename(columns={'xray':f'xray_{fold_num}'}, inplace=True)
+
+        if len(result_xray):
+            result_xray.merge(tmp_xray.drop('N', axis=1), on=['feature', 'value'], how='inner')
+        else:
+            result_xray = tmp_xray.copy()
+        del tmp_xray
+        gc.collect()
+
+    xray_col = [col for col in result_xray.columns if col.count('xray')]
+    result_xray['xray_avg'] = result_xray[xray_col].mean(axis=1)
+    result_xray.to_csv(f'../output/{start_time[4:10]}_xray_{model_type}_CV{LGBM.cv_score}.csv')
+    sys.exit()
 
     cv_score = LGBM.cv_score
     result = LGBM.prediction
