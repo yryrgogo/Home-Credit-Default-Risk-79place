@@ -1,3 +1,4 @@
+feat_no = '001_'
 import numpy as np
 import pandas as pd
 import sys
@@ -21,10 +22,12 @@ from info_home_credit import hcdr_key_cols
 key, target, ignore_list = hcdr_key_cols()
 #========================================================================
 
-fname = 'bureau'
-app = utils.read_df_pkl(path='../input/clean_app*.p')[[key, target]]
-df = utils.read_df_pkl(path=f'../input/clean_{fname}*')
-df = df.merge(app, on=key, how='inner')
+#  fname = 'bureau'
+#  app = utils.read_df_pkl(path='../input/clean_app*.p')[[key, target]]
+app = utils.read_df_pkl(path='../input/clean_app*.p')
+df = app
+#  df = utils.read_df_pkl(path=f'../input/clean_{fname}*')
+#  df = df.merge(app, on=key, how='inner')
 train = df[~df[target].isnull()]
 test = df[df[target].isnull()]
 
@@ -78,15 +81,16 @@ def make_raw_feature(df, is_train):
 
     columns = df.columns
     for col in columns:
+        if col in ignore_list: continue
         value = df[col].values
         if str(type(value[0])).count('object') or str(type(value[0])).count('str'):continue
 
         logger.info(f'# {col} To Pickle & GZIP. | LENGTH: {len(value)}')
         col = col.replace('.', '_').replace('/', '_')
         if is_train:
-            utils.to_pkl_gzip(obj=value, path=f'../features/4_winner/train_{col}')
+            utils.to_pkl_gzip(obj=value, path=f'../features/4_winner/train_{feat_no}{col}')
         else:
-            utils.to_pkl_gzip(obj=value, path=f'../features/4_winner/test_{col}')
+            utils.to_pkl_gzip(obj=value, path=f'../features/4_winner/test_{feat_no}{col}')
 
 make_raw_feature(df=train, is_train=True)
 make_raw_feature(df=test, is_train=False)

@@ -1,7 +1,8 @@
 win_path = f'../features/bureau/*'
 win_path = f'../features/4_winner/*'
 stack_name='add_nest'
-fname='app'
+fname=''
+xray=False
 #========================================================================
 # argv[1] : model_type 
 # argv[2] : learning_rate
@@ -38,7 +39,7 @@ import os
 HOME = os.path.expanduser('~')
 
 sys.path.append(f'{HOME}/kaggle/data_analysis/model')
-from params_lgbm import xgb_params_0814, params_home_credit
+from params_lgbm import params_home_credit
 from xray_wrapper import Xray_Cal
 sys.path.append(f'{HOME}/kaggle/data_analysis')
 from model.lightgbm_ex import lightgbm_ex as lgb_ex
@@ -66,8 +67,6 @@ ignore_list = [key, 'SK_ID_BUREAU', 'SK_ID_PREV', target]
 
 def main():
 
-    #  base = pd.read_csv('../input/base.csv')[[key, target]]
-
     #========================================================================
     # Data Load
     #========================================================================
@@ -80,13 +79,18 @@ def main():
         elif path.count('test'):
             test_path_list.append(path)
 
-    #  train_feature_list = utils.pararell_load_data(path_list=train_path_list, delimiter='gz')
-    #  test_feature_list = utils.pararell_load_data(path_list=test_path_list, delimiter='gz')
-    #  train = pd.concat(train_feature_list, axis=1)
-    #  test = pd.concat(test_feature_list, axis=1)
-    df = utils.read_df_pkl('../input/appli*')
-    train = df[df[target]>=0]
-    test = df[df[target]==-1]
+    base = utils.read_df_pkl('../input/base_app*')
+    base_train = base[~base[target].isnull()].reset_index(drop=True)
+    base_test = base[base[target].isnull()].reset_index(drop=True)
+    train_feature_list = utils.pararell_load_data(path_list=train_path_list, delimiter='gz')
+    test_feature_list = utils.pararell_load_data(path_list=test_path_list, delimiter='gz')
+    train = pd.concat(train_feature_list, axis=1)
+    train = pd.concat([base_train, train], axis=1)
+    test = pd.concat(test_feature_list, axis=1)
+    test = pd.concat([base_test, test], axis=1)
+    #  df = utils.read_df_pkl('../input/appli*')
+    #  train = df[df[target]>=0]
+    #  test = df[df[target]==-1]
 
     metric = 'auc'
     fold=5
@@ -127,7 +131,7 @@ def main():
     cv_feim = LGBM.cv_feim
     feature_num = len(LGBM.use_cols)
 
-    cv_feim.to_csv(f'../valid/{start_time[4:12]}_{model_type}_{fname}_feat{feature_num}_CV{cv_score}_lr{learning_rate}.csv')
+    cv_feim.to_csv(f'../valid/{start_time[4:12]}_{model_type}_{fname}_feat{feature_num}_CV{cv_score}_lr{learning_rate}.csv', index=False)
 
     #========================================================================
     # X-RAYの計算と出力
@@ -138,7 +142,6 @@ def main():
     #                データセットの全カラムについて計算を行うが、
     #                計算時間を考えると最大30カラム程度を推奨。
     #========================================================================
-    xray=False
     if xray:
         train.reset_index(inplace=True)
         train = train[LGBM.use_cols]
