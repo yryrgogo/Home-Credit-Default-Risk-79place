@@ -19,6 +19,7 @@ target = 'TARGET'
 #  app[target] = app[target].where(app[target]>=0, np.nan)
 #  utils.to_df_pkl(df=app, path='../input', fname='clean_application_train_test')
 #  sys.exit()
+utils.start(sys.argv[0])
 
 #==============================================================================
 # to pickle
@@ -28,52 +29,36 @@ def to_pkl():
     app_test = pd.read_csv('../input/application_test.csv')
     app = pd.concat([app_train, app_test], axis=0)
     utils.to_df_pkl(df=app, path='../input', fname='application_train_test')
+    app_eda = eda.df_info(app)
+    app_eda.to_csv('../eda/application_eda.csv')
 
-    bureau = pd.read_csv('../input/bureau.csv')
-    utils.to_df_pkl(df=bureau, path='../input', fname='bureau')
+    bur = pd.read_csv('../input/bureau.csv')
+    utils.to_df_pkl(df=bur, path='../input', fname='bureau')
+    bur_eda = eda.df_info(bur)
+    bur_eda.to_csv('../eda/bureau_eda.csv')
 
-    prev = pd.read_csv('../input/previous_application.csv')
-    utils.to_df_pkl(df=prev, path='../input', fname='previous_application')
+    pre = pd.read_csv('../input/previous_application.csv')
+    utils.to_df_pkl(df=pre, path='../input', fname='previous_application')
+    pre_eda = eda.df_info(pre)
+    pre_eda.to_csv('../eda/prev_eda.csv')
 
-    inst = pd.read_csv('../input/installments_payments.csv')
-    utils.to_df_pkl(df=inst, path='../input', fname='installments_payments')
+    ins = pd.read_csv('../input/installments_payments.csv')
+    utils.to_df_pkl(df=ins, path='../input', fname='installments_payments')
+    ins_eda = eda.df_info(ins)
+    ins_eda.to_csv('../eda/install_eda.csv')
 
     ccb = pd.read_csv('../input/credit_card_balance.csv')
     utils.to_df_pkl(df=ccb, path='../input', fname='credit_card_balance')
+    ccb_eda = eda.df_info(ccb)
+    ccb_eda.to_csv('../eda/credit_eda.csv')
 
     pos = pd.read_csv('../input/POS_CASH_balance.csv')
     utils.to_df_pkl(df=pos, path='../input', fname='POS_CASH_balance')
+    pos_eda = eda.df_info(pos)
+    pos_eda.to_csv('../eda/pos_eda.csv')
 
 #  to_pkl()
-
-# DATA LOAD
-#  utils.start(sys.argv[0])
-#  app = utils.read_df_pkl(path='../input/application*.p').set_index('SK_ID_CURR')
-#  bur = utils.read_df_pkl(path='../input/bureau*.p').set_index('SK_ID_CURR')
-#  pre = utils.read_df_pkl(path='../input/previous*.p').set_index('SK_ID_CURR')
-#  ins = utils.read_df_pkl(path='../input/install*.p').set_index('SK_ID_CURR')
-#  ccb = utils.read_df_pkl(path='../input/credit_*.p').set_index('SK_ID_CURR')
-#  pos = utils.read_df_pkl(path='../input/POS*.p').set_index('SK_ID_CURR')
-#  utils.end(sys.argv[0])
-
-logger.info(f'''
-#==============================================================================
-# OUTPUT EDA TABLE
-#==============================================================================''')
-#  app_eda = eda.df_info(app)
-#  app_eda.to_csv('../output/application_eda.csv')
-#  bur_eda = eda.df_info(bur)
-#  bur_eda.to_csv('../output/bureau_eda.csv')
-#  pre_eda = eda.df_info(pre)
-#  pre_eda.to_csv('../output/prev_eda.csv')
-#  ins_eda = eda.df_info(ins)
-#  ins_eda.to_csv('../output/install_eda.csv')
-#  ccb_eda = eda.df_info(ccb)
-#  ccb_eda.to_csv('../output/credit_eda.csv')
-#  pos_eda = eda.df_info(pos)
-#  pos_eda.to_csv('../output/pos_eda.csv')
-
-utils.start(sys.argv[0])
+#  sys.exit()
 
 #========================================================================
 # CLEANSING & PROCESSING
@@ -84,10 +69,6 @@ def clean_app(app):
     # APPLICATION
     #==============================================================================''')
 
-    revo = 'Revolving loans'
-    drop_list = [col for col in app.columns if col.count('is_train') or col.count('is_test') or col.count('valid_no')]
-    app.drop(drop_list, axis=1, inplace=True)
-
     app['CODE_GENDER'].replace('XNA', 'F', inplace=True)
 
     cat_cols = get_categorical_features(df=app, ignore_list=[])
@@ -95,10 +76,11 @@ def clean_app(app):
         app[col].fillna('XNA', inplace=True)
 
     ' revo '
-    amt_list = ['AMT_ANNUITY', 'AMT_CREDIT', 'AMT_GOODS_PRICE']
-    for col in amt_list:
-        app[f'revo_{col}'] = app[col].where(app[f'NAME_CONTRACT_TYPE']==revo, np.nan)
-        app[col] = app[col].where(app[f'NAME_CONTRACT_TYPE']!=revo, np.nan)
+    #  revo = 'Revolving loans'
+    #  amt_list = ['AMT_ANNUITY', 'AMT_CREDIT', 'AMT_GOODS_PRICE']
+    #  for col in amt_list:
+    #      app[f'revo_{col}'] = app[col].where(app[f'NAME_CONTRACT_TYPE']==revo, np.nan)
+    #      app[col] = app[col].where(app[f'NAME_CONTRACT_TYPE']!=revo, np.nan)
 
     utils.to_df_pkl(df=app, path='../input', fname='clean_application_train_test')
 
@@ -124,7 +106,6 @@ def clean_prev(pre):
 
     cash = 'Cash loans'
     revo = 'Revolving loans'
-    ' RevolvingではCNT_PAYMENT, AMT系をNULLにする '
     pre = utils.read_df_pkl(path='../input/previous*.p')
     pre['AMT_CREDIT'] = pre['AMT_CREDIT'].where(pre['AMT_CREDIT']>0, np.nan)
     pre['AMT_ANNUITY'] = pre['AMT_ANNUITY'].where(pre['AMT_ANNUITY']>0, np.nan)
@@ -142,12 +123,13 @@ def clean_prev(pre):
 
     ignore_list = ['SK_ID_CURR', 'SK_ID_PREV', 'NAME_CONTRACT_TYPE', 'NAME_CONTRACT_STATUS']
     ' revo '
-    for col in pre.columns:
-        if col in ignore_list:
-            logger.info(f'CONTINUE: {col}')
-            continue
-        pre[f'revo_{col}'] = pre[col].where(pre[f'NAME_CONTRACT_TYPE']==revo, np.nan)
-        pre[col] = pre[col].where(pre[f'NAME_CONTRACT_TYPE']!=revo, np.nan)
+    ' RevolvingではCNT_PAYMENT, AMT系をNULLにする '
+    #  for col in pre.columns:
+    #      if col in ignore_list:
+    #          logger.info(f'CONTINUE: {col}')
+    #          continue
+    #      pre[f'revo_{col}'] = pre[col].where(pre[f'NAME_CONTRACT_TYPE']==revo, np.nan)
+    #      pre[col] = pre[col].where(pre[f'NAME_CONTRACT_TYPE']!=revo, np.nan)
 
     pre['NAME_TYPE_SUITE'].fillna('XNA', inplace=True)
     pre['PRODUCT_COMBINATION'].fillna('XNA', inplace=True)
@@ -178,6 +160,7 @@ def clean_pos(pos):
 
 def clean_ins(ins):
 
+    # なぜ0なのかよくわからないし290行しかないので抜いてしまう
     ins = ins.query("AMT_INSTALMENT>0")
 
     utils.to_df_pkl(df=ins, path='../input', fname='clean_install')

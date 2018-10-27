@@ -1,7 +1,7 @@
 win_path = f'../features/bureau/*'
 win_path = f'../features/4_winner/*'
 stack_name='add_nest'
-fname='prev'
+fname='app'
 #========================================================================
 # argv[1] : model_type 
 # argv[2] : learning_rate
@@ -80,10 +80,13 @@ def main():
         elif path.count('test'):
             test_path_list.append(path)
 
-    train_feature_list = utils.pararell_load_data(path_list=train_path_list, delimiter='gz')
-    test_feature_list = utils.pararell_load_data(path_list=test_path_list, delimiter='gz')
-    train = pd.concat(train_feature_list, axis=1)
-    test = pd.concat(test_feature_list, axis=1)
+    #  train_feature_list = utils.pararell_load_data(path_list=train_path_list, delimiter='gz')
+    #  test_feature_list = utils.pararell_load_data(path_list=test_path_list, delimiter='gz')
+    #  train = pd.concat(train_feature_list, axis=1)
+    #  test = pd.concat(test_feature_list, axis=1)
+    df = utils.read_df_pkl('../input/appli*')
+    train = df[df[target]>=0]
+    test = df[df[target]==-1]
 
     metric = 'auc'
     fold=5
@@ -116,49 +119,50 @@ def main():
         ,oof_flg=oof_flg
     )
 
-    #  utils.mkdir_func('../model')
-    #  import pickle
-    #  with open(f'../model/{start_time[4:12]}_{model_type}_{fname}.pkl', 'wb') as m:
-    #      pickle.dump(obj=LGBM.fold_model_list, file=m)
-    #  sys.exit()
-
     #========================================================================
-    # X-RAYの計算と出力
-    # Args:
-    #     model      : 学習済のモデル
-    #     train      : モデルの学習に使用したデータセット
-    #     column_list: X-RAYの計算を行うカラムリスト。指定なしの場合、
-    #                  データセットの全カラムについて計算を行うが、
-    #                  計算時間を考えると最大30カラム程度を推奨。
+    # Result
     #========================================================================
-    train.reset_index(inplace=True)
-    train = train[LGBM.use_cols]
-    result_xray = pd.DataFrame()
-    N_sample = 250000
-    max_point = 30
-    for fold_num in range(fold):
-        model = LGBM.fold_model_list[fold_num]
-        if fold_num==0:
-            xray_obj = Xray_Cal(logger=logger, ignore_list=ignore_list, model=model)
-        xray_obj, tmp_xray = xray_obj.get_xray(base_xray=train, col_list=train.columns, fold_num=fold_num, N_sample=N_sample, max_point=max_point)
-        tmp_xray.rename(columns={'xray':f'xray_{fold_num}'}, inplace=True)
-
-        if len(result_xray):
-            result_xray.merge(tmp_xray.drop('N', axis=1), on=['feature', 'value'], how='inner')
-        else:
-            result_xray = tmp_xray.copy()
-        del tmp_xray
-        gc.collect()
-
-    xray_col = [col for col in result_xray.columns if col.count('xray')]
-    result_xray['xray_avg'] = result_xray[xray_col].mean(axis=1)
-    result_xray.to_csv(f'../output/{start_time[4:10]}_xray_{model_type}_CV{LGBM.cv_score}.csv')
-    sys.exit()
-
     cv_score = LGBM.cv_score
     result = LGBM.prediction
     cv_feim = LGBM.cv_feim
     feature_num = len(LGBM.use_cols)
+
+    cv_feim.to_csv(f'../valid/{start_time[4:12]}_{model_type}_{fname}_feat{feature_num}_CV{cv_score}_lr{learning_rate}.csv')
+
+    #========================================================================
+    # X-RAYの計算と出力
+    # Args:
+    #     model    : 学習済のモデル
+    #     train    : モデルの学習に使用したデータセット
+    #     col_list : X-RAYの計算を行うカラムリスト。指定なしの場合、
+    #                データセットの全カラムについて計算を行うが、
+    #                計算時間を考えると最大30カラム程度を推奨。
+    #========================================================================
+    xray=False
+    if xray:
+        train.reset_index(inplace=True)
+        train = train[LGBM.use_cols]
+        result_xray = pd.DataFrame()
+        N_sample = 150000
+        max_point = 30
+        for fold_num in range(fold):
+            model = LGBM.fold_model_list[fold_num]
+            if fold_num==0:
+                xray_obj = Xray_Cal(logger=logger, ignore_list=ignore_list, model=model)
+            xray_obj, tmp_xray = xray_obj.get_xray(base_xray=train, col_list=train.columns, fold_num=fold_num, N_sample=N_sample, max_point=max_point)
+            tmp_xray.rename(columns={'xray':f'xray_{fold_num}'}, inplace=True)
+
+            if len(result_xray):
+                result_xray.merge(tmp_xray.drop('N', axis=1), on=['feature', 'value'], how='inner')
+            else:
+                result_xray = tmp_xray.copy()
+            del tmp_xray
+            gc.collect()
+
+        xray_col = [col for col in result_xray.columns if col.count('xray')]
+        result_xray['xray_avg'] = result_xray[xray_col].mean(axis=1)
+        result_xray.to_csv(f'../output/{start_time[4:10]}_xray_{model_type}_CV{LGBM.cv_score}.csv')
+        sys.exit()
 
     submit = pd.read_csv('../input/sample_submission.csv')
     #  submit = []
