@@ -378,7 +378,7 @@ def load_file(path, delimiter='gz'):
     return tmp
 
 def get_filename(path, delimiter='gz'):
-    filename = re.search(rf'/([^/.]*).{delimiter}', path).group(1)
+    filename = re.search(rf"/([^/.]*).{delimiter}", path).group(1)
     return filename
 
 def pararell_load_data(path_list, delimiter=False):
