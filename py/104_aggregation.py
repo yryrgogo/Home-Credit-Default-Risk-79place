@@ -46,48 +46,6 @@ gc.collect()
 # ===========================================================================
 # 集計方法を選択
 # ===========================================================================
-method_list = ['sum', 'mean', 'var', 'max', 'min']
-
-
-def one_level_agg(df, prefix):
-    # =======================================================================
-    # 集計するカラムリストを用意
-    # =======================================================================
-    method_list = ['mean', 'var']
-    num_list = ['EXT_SOURCE_2']
-    cat_list = get_categorical_features(df=df, ignore_list=ignore_list)
-    #  amt_list = [col for col in num_list if col.count('AMT_')]
-    #  days_list = [col for col in num_list if col.count('DAYS_')]
-
-    # 直列処理
-    for cat in cat_list:
-        if len(df[cat].unique())<=3:
-            continue
-        for num in num_list:
-            for method in method_list:
-                base = df[[key, cat, target]].drop_duplicates()
-                tmp = df[[cat, num]]
-                tmp_result = base_aggregation(
-                    df=tmp, level=cat, method=method, prefix=prefix, feature=num)
-                result = base.merge(tmp_result, on=cat, how='left')
-
-                for col in result.columns:
-                    if not(col.count('@')) or col in ignore_list:
-                        continue
-
-                    train_file_path = f"../features/1_first_valid/train_{col}"
-                    test_file_path = f"../features/1_first_valid/test_{col}"
-
-                    utils.to_pkl_gzip(obj=result[result[target]>=0][col].values, path=train_file_path)
-                    utils.to_pkl_gzip(obj=result[result[target].isnull()][col].values, path=test_file_path)
-
-                    logger.info(f'''
-                    #========================================================================
-                    # COMPLETE MAKE FEATURE : {train_file_path}
-                    #========================================================================''')
-                del result, tmp_result
-                gc.collect()
-
 def pararell_arith(feat_combi):
     f1 = feat_combi[0]
     f2 = feat_combi[1]

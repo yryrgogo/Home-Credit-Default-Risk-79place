@@ -61,17 +61,17 @@ df.drop('REGION_POPULATION_RELATIVE', axis=1, inplace=True)
 df['INCOME_per_CHILD@'] = df['AMT_INCOME_TOTAL'] / df['CNT_CHILDREN']
 df['INCOME_per_FAMILY@'] = df['AMT_INCOME_TOTAL'] * df['CNT_FAM_MEMBERS']
 
-df['HOUSE_HOLD_CODE@'] = df[['CNT_CHILDREN', 'CNT_FAM_MEMBERS', 'CODE_GENDER']].apply(lambda x:
-                                                                                     '1' if x[0]==0 and x[1]==1 and x[2]=='M'
-                                                                                     else '2' if x[0]>=1 and x[1]==2 and x[2]=='M'
-                                                                                     else '3' if x[0]>=1 and x[1]==2 and x[2]=='F'
-                                                                                     else '4' if x[0]>=0 and x[1]<=5 and x[2]=='M'
-                                                                                     else '5' if x[0]>=0 and x[1]> 5 and x[2]=='M'
-                                                                                     else '6' if x[0]==0 and x[1]==1 and x[2]=='F'
-                                                                                     else '7' if x[0]>=0 and x[1]<=5 and x[2]=='F'
-                                                                                     else '8' if x[0]>=0 and x[1]> 5 and x[2]=='F'
-                                                                                     else 9
-                                                                                     , axis=1)
+#  df['HOUSE_HOLD_CODE@'] = df[['CNT_CHILDREN', 'CNT_FAM_MEMBERS', 'CODE_GENDER']].apply(lambda x:
+#                                                                                       '1' if x[0]==0 and x[1]==1 and x[2]=='M'
+#                                                                                       else '2' if x[0]>=1 and x[1]==2 and x[2]=='M'
+#                                                                                       else '3' if x[0]>=1 and x[1]==2 and x[2]=='F'
+#                                                                                       else '4' if x[0]>=0 and x[1]<=5 and x[2]=='M'
+#                                                                                       else '5' if x[0]>=0 and x[1]> 5 and x[2]=='M'
+#                                                                                       else '6' if x[0]==0 and x[1]==1 and x[2]=='F'
+#                                                                                       else '7' if x[0]>=0 and x[1]<=5 and x[2]=='F'
+#                                                                                       else '8' if x[0]>=0 and x[1]> 5 and x[2]=='F'
+#                                                                                       else 9
+#                                                                                       , axis=1)
 
 for cat in cat_list:
     if (cat.count('NAME') and not(cat.count('CONTRACT'))) or cat.count('TION_TYPE') or cat.count('HOUSE_HOLD'):

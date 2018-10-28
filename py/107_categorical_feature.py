@@ -1,6 +1,8 @@
+prefix = '107_'
 import gc
 import numpy as np
 import pandas as pd
+from itertools import combinations
 import sys
 import re
 from glob import glob
@@ -58,5 +60,91 @@ def make_cat_features(df, filekey):
             utils.to_pkl_gzip(obj=result_train, path=f'../features/{filekey}/train_{col}')
             utils.to_pkl_gzip(obj=result_test, path=f'../features/{filekey}/test_{col}')
 
+method_list = ['sum', 'mean', 'var', 'max', 'min']
 
-make_cat_features(df=app, filekey='1_first_valid')
+
+def one_level_agg(df, prefix):
+    # =======================================================================
+    # 集計するカラムリストを用意
+    # =======================================================================
+    method_list = ['mean', 'var']
+    num_list = ['EXT_SOURCE_2']
+    cat_list = get_categorical_features(df=df, ignore_list=ignore_list)
+    #  amt_list = [col for col in num_list if col.count('AMT_')]
+    #  days_list = [col for col in num_list if col.count('DAYS_')]
+
+    # 直列処理
+    for cat in cat_list:
+        if len(df[cat].unique())<=3:
+            continue
+        for num in num_list:
+            for method in method_list:
+                base = df[[key, cat, target]].drop_duplicates()
+                tmp = df[[cat, num]]
+                tmp_result = base_aggregation(
+                    df=tmp, level=cat, method=method, prefix=prefix, feature=num)
+                result = base.merge(tmp_result, on=cat, how='left')
+
+                for col in result.columns:
+                    if not(col.count('@')) or col in ignore_list:
+                        continue
+
+                    train_file_path = f"../features/1_first_valid/train_{col}"
+                    test_file_path = f"../features/1_first_valid/test_{col}"
+
+                    utils.to_pkl_gzip(obj=result[result[target]>=0][col].values, path=train_file_path)
+                    utils.to_pkl_gzip(obj=result[result[target].isnull()][col].values, path=test_file_path)
+
+                    logger.info(f'''
+                    #========================================================================
+                    # COMPLETE MAKE FEATURE : {train_file_path}
+                    #========================================================================''')
+                del result, tmp_result
+                gc.collect()
+
+
+def two_level_agg(df, prefix):
+    # =======================================================================
+    # 集計するカラムリストを用意
+    # =======================================================================
+    method_list = ['mean']
+    num_list = ['EXT_SOURCE_2']
+    cat_list = get_categorical_features(df=df, ignore_list=ignore_list)
+    cat_combi = combinations(cat_list, 2)
+    #  amt_list = [col for col in num_list if col.count('AMT_')]
+    #  days_list = [col for col in num_list if col.count('DAYS_')]
+
+    # 直列処理
+    for com in cat_combi:
+        for num in num_list:
+            for method in method_list:
+                base = df[[key, target] + list(com)].drop_duplicates()
+                tmp = df[list(com)+[num]]
+                tmp_result = base_aggregation(
+                    df=tmp, level=list(com), method=method, prefix=prefix, feature=num)
+                result = base.merge(tmp_result, on=list(com), how='left')
+
+                for col in result.columns:
+                    if not(col.count('@')) or col in ignore_list:
+                        continue
+
+                    train_feat = result[result[target]>=0][col].values
+                    test_feat = result[result[target].isnull()][col].values
+                    col = col.replace('[', '_').replace(']', '_').replace(' ', '').replace(',', '_')
+                    train_file_path = f"../features/1_first_valid/train_{col}"
+                    test_file_path = f"../features/1_first_valid/test_{col}"
+
+                    utils.to_pkl_gzip(obj=train_feat, path=train_file_path)
+                    utils.to_pkl_gzip(obj=test_feat, path=test_file_path)
+
+                    logger.info(f'''
+                    #========================================================================
+                    # COMPLETE MAKE FEATURE : {train_file_path}
+                    #========================================================================''')
+                del result, tmp_result
+                gc.collect()
+
+
+#  make_cat_features(df=app, filekey='1_first_valid')
+
+two_level_agg(app, prefix)

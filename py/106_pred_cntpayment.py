@@ -50,7 +50,7 @@ df = prev.merge(app.drop(amt_list, axis=1), on=key, how='inner')
 days_list = [col for col in df.columns if col.count('DAYS') and not(col.count('DECISION'))]
 for col in days_list:
     df[col] = df[col].values - df[dd].values
-df.drop(dd, axis=1, inplace=True)
+df.drop([dd, 'TARGET'], axis=1, inplace=True)
 
 train = df[~df[cpy].isnull()]
 test = app

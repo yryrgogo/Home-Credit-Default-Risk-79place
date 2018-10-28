@@ -126,7 +126,11 @@ def move_to_use():
     except IndexError:
         path = ''
     best_select = pd.read_csv(path)
-    best_feature = best_select['feature'].values
+    tmp_best_feature = best_select['feature'].values
+    best_feature = []
+    for feat in tmp_best_feature:
+        best_feature.append('train_'+feat)
+        best_feature.append('test_'+feat)
 
     win_list = glob.glob(win_path + '*.gz')
     for path in win_list:
@@ -160,6 +164,7 @@ def move_to_use():
         except AttributeError:
             print(f"AttributeError: \nPathName: {path}")
             sys.exit()
+        #  if filename[5:] in best_feature or filename[6:] in best_feature:
         if filename in best_feature:
             try:
                 shutil.move(path, win_path)
