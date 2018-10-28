@@ -1,15 +1,11 @@
-import gc
 import numpy as np
 import pandas as pd
 import sys
-import re
-from glob import glob
 import os
 HOME = os.path.expanduser('~')
 import datetime
 sys.path.append(f'{HOME}/kaggle/data_analysis/model')
-from params_lgbm import xgb_params_0814, params_home_credit
-from xray_wrapper import Xray_Cal
+from params_lgbm import params_home_credit
 sys.path.append(f'{HOME}/kaggle/data_analysis')
 from model.lightgbm_ex import lightgbm_ex as lgb_ex
 
@@ -95,14 +91,6 @@ LGBM = LGBM.cross_prediction(
     ,early_stopping_rounds=early_stopping_rounds
     ,oof_flg=oof_flg
 )
-
-xray=False
-if xray:
-    for fold_num in range(fold):
-        model = LGBM.fold_model_list[fold_num]
-        tmp_xray = Xray_Cal(ignore_list=ignore_list, model=model).get_xray(base_xray=train)
-        tmp_xray.to_csv('../output/xray.csv')
-        sys.exit()
 
 cv_score = LGBM.cv_score
 result = LGBM.prediction
