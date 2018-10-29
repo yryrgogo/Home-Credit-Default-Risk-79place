@@ -4,8 +4,6 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 import sys
-import re
-from glob import glob
 import os
 HOME = os.path.expanduser('~')
 sys.path.append(f"{HOME}/kaggle/data_analysis/library/")
@@ -15,7 +13,7 @@ from utils import logger_func, mkdir_func
 logger = logger_func()
 import eda
 from utils import get_categorical_features, get_numeric_features, pararell_process
-from feature_engineering import base_aggregation, diff_feature, division_feature, product_feature, cnt_encoding, select_category_value_agg, exclude_feature, target_encoding
+from feature_engineering import base_aggregation, diff_feature, division_feature, product_feature, cnt_encoding
 from tqdm import tqdm
 
 #========================================================================
@@ -63,9 +61,9 @@ def make_cat_features(df, filekey):
 method_list = ['sum', 'mean', 'var', 'max', 'min']
 
 
-def one_level_agg(df, prefix):
+def single_level_agg(df, prefix):
     # =======================================================================
-    # 集計するカラムリストを用意
+    # 1つのカテゴリを集計値に置き換える
     # =======================================================================
     method_list = ['mean', 'var']
     num_list = ['EXT_SOURCE_2']
@@ -103,9 +101,9 @@ def one_level_agg(df, prefix):
                 gc.collect()
 
 
-def two_level_agg(df, prefix):
+def multi_level_agg(df, prefix):
     # =======================================================================
-    # 集計するカラムリストを用意
+    # 複数カテゴリの組み合わせを集計値に置き換える
     # =======================================================================
     method_list = ['mean']
     num_list = ['EXT_SOURCE_2']
@@ -147,4 +145,5 @@ def two_level_agg(df, prefix):
 
 #  make_cat_features(df=app, filekey='1_first_valid')
 
-two_level_agg(app, prefix)
+single_level_agg(app, prefix)
+multi_level_agg(app, prefix)
