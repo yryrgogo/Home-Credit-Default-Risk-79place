@@ -81,6 +81,11 @@ def make_raw_feature(df, is_train):
 
     columns = df.columns
     for col in columns:
+
+        # Special
+        #  if not(col.count('DOCUMENT')):
+        #      continue
+
         if col in ignore_list: continue
         value = df[col].values
         if str(type(value[0])).count('object') or str(type(value[0])).count('str'):continue
@@ -88,9 +93,9 @@ def make_raw_feature(df, is_train):
         logger.info(f'# {col} To Pickle & GZIP. | LENGTH: {len(value)}')
         col = col.replace('.', '_').replace('/', '_')
         if is_train:
-            utils.to_pkl_gzip(obj=value, path=f'../features/4_winner/train_{feat_no}{col}')
+            utils.to_pkl_gzip(obj=value, path=f'../features/1_first_valid/train_{feat_no}{col}')
         else:
-            utils.to_pkl_gzip(obj=value, path=f'../features/4_winner/test_{feat_no}{col}')
+            utils.to_pkl_gzip(obj=value, path=f'../features/1_first_valid/test_{feat_no}{col}')
 
 make_raw_feature(df=train, is_train=True)
 make_raw_feature(df=test, is_train=False)

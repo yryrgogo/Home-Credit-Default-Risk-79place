@@ -355,9 +355,13 @@ def logger_func():
     return logger
 
 
-def load_file(path, delimiter='gz'):
+def load_file(path):
     if path.count('.csv'):
         return pd.read_csv(path)
+    elif path.count('.gz'):
+        delimiter = 'gz'
+    elif path.count('.npy'):
+        delimiter = 'npy'
     filename = get_filename(path=path, delimiter=delimiter)
 
     if filename[:5]=='train':
@@ -381,7 +385,7 @@ def get_filename(path, delimiter='gz'):
     filename = re.search(rf"/([^/.]*).{delimiter}", path).group(1)
     return filename
 
-def pararell_load_data(path_list, delimiter=False):
+def pararell_load_data(path_list):
     p = Pool(multiprocessing.cpu_count())
     p_list = p.map(load_file, path_list)
     p.close

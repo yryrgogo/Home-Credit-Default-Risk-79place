@@ -30,19 +30,29 @@ ignore_list = [key, target, 'SK_ID_BUREAU', 'SK_ID_PREV']
 # ===========================================================================
 # DATA LOAD
 # ===========================================================================
-base = utils.read_df_pkl(path='../input/base_app*')
 fname = 'app'
 prefix = feat_no + f'{fname}_'
 df = utils.read_df_pkl(path=f'../input/clean_{fname}*.p')
 
-cat_list = get_categorical_features(df=df, ignore_list=ignore_list)
+
+# Null Count
+df['Null_Cnt@'] = df.isnull().sum(axis=1)
+# Document
+doc_list = [col for col in df.columns if col.count('DOCUMENT')]
+df['DOCUMENT_SUM@'] = df[doc_list].sum(axis=1)
+# Document 3,5,6,8,11,18
+doc_list2 = [col for col in doc_list if col.count('DOCUMENT') and ( col.count('_3') or col.count('_5') or col.count('_6') or col.count('_8') or col.count('_11') or col.count('_18') ) ]
+df['DOCUMENT_SUM2@'] = df[doc_list2].sum(axis=1)
+
+#  cat_list = get_categorical_features(df=df, ignore_list=ignore_list)
 
 # ボツ
 #  df['NEW_REGION_POPULATION_RELATIVE@'] = (df['REGION_POPULATION_RELATIVE']*10000).astype('int')
 #  df.drop('REGION_POPULATION_RELATIVE', axis=1, inplace=True)
 
-df['INCOME_per_CHILD@'] = df['AMT_INCOME_TOTAL'] / df['CNT_CHILDREN']
-df['INCOME_per_FAMILY@'] = df['AMT_INCOME_TOTAL'] * df['CNT_FAM_MEMBERS']
+# INCOME
+#  df['INCOME_per_CHILD@'] = df['AMT_INCOME_TOTAL'] / df['CNT_CHILDREN']
+#  df['INCOME_per_FAMILY@'] = df['AMT_INCOME_TOTAL'] * df['CNT_FAM_MEMBERS']
 
 # ボツ
 #  df['HOUSE_HOLD_CODE@'] = df[['CNT_CHILDREN', 'CNT_FAM_MEMBERS', 'CODE_GENDER']].apply(lambda x:
@@ -58,12 +68,12 @@ df['INCOME_per_FAMILY@'] = df['AMT_INCOME_TOTAL'] * df['CNT_FAM_MEMBERS']
 #                                                                                       , axis=1)
 
 # INCOMEを使ったカテゴリのエンコーディング（あんま効かない）
-for cat in cat_list:
-    if (cat.count('NAME') and not(cat.count('CONTRACT'))) or cat.count('TION_TYPE') or cat.count('HOUSE_HOLD'):
+#  for cat in cat_list:
+#      if (cat.count('NAME') and not(cat.count('CONTRACT'))) or cat.count('TION_TYPE') or cat.count('HOUSE_HOLD'):
 
-        df_feat = df.groupby(cat)['AMT_INCOME_TOTAL'].mean().reset_index().rename(columns={'AMT_INCOME_TOTAL':f'INCOME_mean@{cat}'})
-        df = df.merge(df_feat, on=cat, how='inner')
-        df_feat = df.groupby(cat)['AMT_INCOME_TOTAL'].std().reset_index().rename(columns={'AMT_INCOME_TOTAL':f'INCOME_std@{cat}'})
+#          df_feat = df.groupby(cat)['AMT_INCOME_TOTAL'].mean().reset_index().rename(columns={'AMT_INCOME_TOTAL':f'INCOME_mean@{cat}'})
+#          df = df.merge(df_feat, on=cat, how='inner')
+#          df_feat = df.groupby(cat)['AMT_INCOME_TOTAL'].std().reset_index().rename(columns={'AMT_INCOME_TOTAL':f'INCOME_std@{cat}'})
 
 
 # Feature Save

@@ -1,4 +1,4 @@
-feat_no = '108_'
+feat_no = '111_'
 prefix = feat_no
 ext_feat=False
 import numpy as np
@@ -32,19 +32,32 @@ ignore_list = [key, target, 'SK_ID_BUREAU', 'SK_ID_PREV']
 # ===========================================================================
 base = utils.read_df_pkl(path='../input/base_app*')
 fname = 'app'
-prefix = feat_no + f'{fname}_'
+prefix = f'{feat_no}{fname}_'
 df = utils.read_df_pkl(path=f'../input/clean_{fname}*.p')
 
+train = df[~df[target].isnull()]
+test = df[df[target].isnull()]
 
+neighbor = '110_app_neighbor81@'
+train[neighbor] = utils.read_pkl_gzip('../input/train_110_app_neighbor81@.gz')
+test[neighbor] = utils.read_pkl_gzip('../input/test_110_app_neighbor81@.gz')
 cat_list = get_categorical_features(df=df, ignore_list=ignore_list)
 
 #========================================================================
 # TARGET ENCODING
 #========================================================================
 for cat in cat_list:
-    feat_train, feat_test = target_encoding(logger=logger, base=base, train=tmp_train, test=tmp_test, key=key, level=cat, target=target, fold_type='group', group_col_name=fvid, prefix=feature_group, ignore_list=ignore_list)
+    combi = [neighbor, cat]
+    combi = cat
+    feat_train, feat_test = target_encoding(logger=logger, train=train, test=test, key=key, level=combi, target=target, fold_type='stratified', group_col_name='', prefix='', ignore_list=ignore_list)
 
+    col = f"'TE@{str(combi).replace('[', '').replace(' ', '').replace(',', '_')}"
+    train_file_path = f"../features/1_first_valid/train_{prefix}{col}"
+    test_file_path = f"../features/1_first_valid/test_{prefix}{col}"
+    utils.to_pkl_gzip(obj=feat_train, path=train_file_path)
+    utils.to_pkl_gzip(obj=feat_test, path=test_file_path)
 
+sys.exit()
 # Feature Save
 for col in df.columns:
     if not(col.count('@')) or col in ignore_list:

@@ -1,5 +1,4 @@
-win_path = f'../features/bureau/*'
-win_path = f'../features/4_winner/*'
+win_path = f'../features/4_winner/*.gz'
 stack_name='add_nest'
 fname=''
 xray=False
@@ -70,6 +69,7 @@ def main():
     #========================================================================
     # Data Load
     #========================================================================
+    base = utils.read_df_pkl('../input/base_app*')
     win_path_list = glob.glob(win_path)
     train_path_list = []
     test_path_list = []
@@ -79,11 +79,10 @@ def main():
         elif path.count('test'):
             test_path_list.append(path)
 
-    base = utils.read_df_pkl('../input/base_app*')
     base_train = base[~base[target].isnull()].reset_index(drop=True)
     base_test = base[base[target].isnull()].reset_index(drop=True)
-    train_feature_list = utils.pararell_load_data(path_list=train_path_list, delimiter='gz')
-    test_feature_list = utils.pararell_load_data(path_list=test_path_list, delimiter='gz')
+    train_feature_list = utils.pararell_load_data(path_list=train_path_list)
+    test_feature_list = utils.pararell_load_data(path_list=test_path_list)
     train = pd.concat(train_feature_list, axis=1)
     train = pd.concat([base_train, train], axis=1)
     test = pd.concat(test_feature_list, axis=1)
@@ -187,7 +186,10 @@ def main():
             test = test.reset_index()[[key, target]].groupby(key)[target].mean().reset_index()
             submit = submit[key].to_frame().merge(test, on=key, how='left')
             submit[target].fillna(0, inplace=True)
-            submit.to_csv(f'../submit/{start_time[4:12]}_submit_{fname}_{model_type}_rate{learning_rate}_{feature_num}features_CV{cv_score}_LB.csv', index=False)
+            submit_path = f'../submit/{start_time[4:12]}_submit_{fname}_{model_type}_rate{learning_rate}_{feature_num}features_CV{cv_score}_LB.csv'
+            submit.to_csv(submit_path, index=False)
+            utils.submit(file_path=submit_path)
+
         else:
             submit[target] = result
             submit.to_csv(f'../submit/{start_time[4:12]}_submit_{model_type}_rate{learning_rate}_{feature_num}features_CV{cv_score}_LB.csv', index=False)
