@@ -35,7 +35,6 @@ fname = 'app'
 prefix = feat_no + f'{fname}_'
 df = utils.read_df_pkl(path=f'../input/clean_{fname}*.p')
 
-
 cat_list = get_categorical_features(df=df, ignore_list=ignore_list)
 
 # ボツ
