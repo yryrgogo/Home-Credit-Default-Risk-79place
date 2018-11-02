@@ -45,7 +45,7 @@ from model.lightgbm_ex import lightgbm_ex as lgb_ex
 
 sys.path.append(f"{HOME}/kaggle/data_analysis/library/")
 import utils
-from make_file import make_feature_set
+from preprocessing import get_ordinal_mapping
 from utils import logger_func
 logger=logger_func()
 
@@ -69,27 +69,30 @@ def main():
     #========================================================================
     # Data Load
     #========================================================================
-    base = utils.read_df_pkl('../input/base_app*')
-    win_path_list = glob.glob(win_path)
-    train_path_list = []
-    test_path_list = []
-    for path in win_path_list:
-        if path.count('train'):
-            train_path_list.append(path)
-        elif path.count('test'):
-            test_path_list.append(path)
 
-    base_train = base[~base[target].isnull()].reset_index(drop=True)
-    base_test = base[base[target].isnull()].reset_index(drop=True)
-    train_feature_list = utils.pararell_load_data(path_list=train_path_list)
-    test_feature_list = utils.pararell_load_data(path_list=test_path_list)
-    train = pd.concat(train_feature_list, axis=1)
-    train = pd.concat([base_train, train], axis=1)
-    test = pd.concat(test_feature_list, axis=1)
-    test = pd.concat([base_test, test], axis=1)
-    #  df = utils.read_df_pkl('../input/appli*')
-    #  train = df[df[target]>=0]
-    #  test = df[df[target]==-1]
+    #  base = utils.read_df_pkl('../input/base_app*')
+    #  win_path_list = glob.glob(win_path)
+    #  train_path_list = []
+    #  test_path_list = []
+    #  for path in win_path_list:
+    #      if path.count('train'):
+    #          train_path_list.append(path)
+    #      elif path.count('test'):
+    #          test_path_list.append(path)
+
+    #  base_train = base[~base[target].isnull()].reset_index(drop=True)
+    #  base_test = base[base[target].isnull()].reset_index(drop=True)
+    #  train_feature_list = utils.pararell_load_data(path_list=train_path_list)
+    #  test_feature_list = utils.pararell_load_data(path_list=test_path_list)
+    #  train = pd.concat(train_feature_list, axis=1)
+    #  train = pd.concat([base_train, train], axis=1)
+    #  test = pd.concat(test_feature_list, axis=1)
+    #  test = pd.concat([base_test, test], axis=1)
+
+    # 実験用
+    df = utils.read_df_pkl('../input/clean_app*').sample(50000)
+    train = df[df[target]>=0]
+    test = df[df[target].isnull()]
 
     metric = 'auc'
     fold=5
@@ -99,8 +102,7 @@ def main():
     oof_flg=True
     LGBM = lgb_ex(logger=logger, metric=metric, model_type=model_type, ignore_list=ignore_list)
 
-    train, _ = LGBM.data_check(df=train)
-    test, drop_list = LGBM.data_check(df=test, test_flg=True)
+    train, test, drop_list = LGBM.data_check(train=train, test=test)
     if len(drop_list):
         train.drop(drop_list, axis=1, inplace=True)
         test.drop(drop_list, axis=1, inplace=True)
