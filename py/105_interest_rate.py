@@ -39,16 +39,20 @@ if prev_ir:
     df = df[[key, prev_key, dd, acr, aan, cpy, adp, co_type]].merge(app, on=key, how='inner')
     df = df[~df[cpy].isnull()]
 
-    # 金利合計（分割数考慮前）
-    tmp_ir = (df[aan].values * df[cpy].values) / df[acr].values
-
-    for cnt in range(3, 61, 3):
-        ir = ( tmp_ir * (cnt / df[cpy]) ) - 1.0
-        df[f'ir_{cnt}'] = ir
-        df[f'ir_{cnt}'] = df[f'ir_{cnt}'].map(lambda x: x if (0.0<x) and (x<0.5) else np.nan)
-        print(f"{cnt} :", len(df[f'ir_{cnt}'].dropna()))
-        if len(df[f'ir_{cnt}'].dropna())<len(df)*0.001:
-            df.drop(f'ir_{cnt}', axis=1, inplace=True)
+    for cnt in range(3, 64, 3):
+        if cnt<=60:
+            ir = ( (df[aan].values * cnt) / df[acr].values ) - 1.0
+            df[f'ir_{cnt}@'] = ir
+            df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.0<x) and (x<0.5) else np.nan)
+            print(f"{cnt} :", len(df[f'ir_{cnt}@'].dropna()))
+            if len(df[f'ir_{cnt}@'].dropna())<len(df)*0.001:
+                df.drop(f'ir_{cnt}@', axis=1, inplace=True)
+                continue
+        else:
+            ir = ( (df[aan].values * df[cpy].values) / df[acr].values ) - 1.0
+            df[f'ir_pred@'] = ir
+            df[f'ir_pred@'] = df[f'ir_pred@'].map(lambda x: x if (0.0<x) and (x<0.5) else np.nan)
+            cnt = 'pred'
 
     ir_cols = [col for col in df.columns if col.count('ir_')]
     df['ir_mean'] = df[ir_cols].mean(axis=1)
@@ -101,18 +105,21 @@ test_file_path = f"../features/1_first_valid/test_{cpy}"
 #  utils.to_pkl_gzip(obj=df[~df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=train_file_path)
 #  utils.to_pkl_gzip(obj=df[df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=test_file_path)
 
-# 金利合計（分割数考慮前）
-tmp_ir = (df[aan].values * df[cpy].values) / df[acr].values
-
 # 金利が何回分の支払いに対して発生しているか不明なので、3回刻みで一通り作る
-for cnt in range(3, 61, 3):
-    ir = ( tmp_ir * (cnt / df[cpy]) ) - 1.0
-    df[f'ir_{cnt}@'] = ir
-    df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.0<x) and (x<0.5) else np.nan)
-    print(f"{cnt} :", len(df[f'ir_{cnt}@'].dropna()))
-    if len(df[f'ir_{cnt}@'].dropna())<len(df)*0.001:
-        df.drop(f'ir_{cnt}@', axis=1, inplace=True)
-        continue
+for cnt in range(3, 64, 3):
+    if cnt<=60:
+        ir = ( (df[aan].values * cnt) / df[acr].values ) - 1.0
+        df[f'ir_{cnt}@'] = ir
+        df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.0<x) and (x<0.5) else np.nan)
+        print(f"{cnt} :", len(df[f'ir_{cnt}@'].dropna()))
+        if len(df[f'ir_{cnt}@'].dropna())<len(df)*0.001:
+            df.drop(f'ir_{cnt}@', axis=1, inplace=True)
+            continue
+    else:
+        ir = ( (df[aan].values * df[cpy].values) / df[acr].values ) - 1.0
+        df[f'ir_pred@'] = ir
+        df[f'ir_pred@'] = df[f'ir_pred@'].map(lambda x: x if (0.0<x) and (x<0.5) else np.nan)
+        cnt = 'pred'
 
     #========================================================================
     # 時系列で標準化
@@ -122,7 +129,6 @@ for cnt in range(3, 61, 3):
         tmp_std = df.groupby('bur_bin')[f'ir_{cnt}@'].std().reset_index().rename(columns={f'ir_{cnt}@':'std'})
         df = df.merge(tmp_mean, on='bur_bin', how='inner')
         df = df.merge(tmp_std, on='bur_bin', how='inner')
-        #  df[f'stan_ir_{cnt}@'] = df[[f'ir_{cnt}@', 'mean', 'std']].apply(lambda x: (x[0]-x[1]) / x[2], axis=1)
         df[f'stan_ir_{cnt}@'] = (df[f'ir_{cnt}@'].values - df['mean'].values) / df['std'].values
         df.drop([f'ir_{cnt}@', 'mean', 'std'], axis=1, inplace=True)
 
