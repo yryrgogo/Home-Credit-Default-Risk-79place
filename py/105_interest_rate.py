@@ -91,15 +91,16 @@ if standard:
 #========================================================================
 # Current ApplicationのInterest Rateを計算
 #========================================================================
+
 # CNT_PAYMENT
 train_file_path = f"../features/1_first_valid/train_{cpy}"
 test_file_path = f"../features/1_first_valid/test_{cpy}"
 
 # Current Application CNT_PAYMENT Save as Feature
-#  utils.to_pkl_gzip(obj=df[~df[target].isnull()][cpy].values, path=train_file_path)
-#  utils.to_pkl_gzip(obj=df[df[target].isnull()][cpy].values, path=test_file_path)
-#  utils.to_pkl_gzip(obj=df[~df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=train_file_path)
-#  utils.to_pkl_gzip(obj=df[df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=test_file_path)
+utils.to_pkl_gzip(obj=df[~df[target].isnull()][cpy].values, path=train_file_path)
+utils.to_pkl_gzip(obj=df[df[target].isnull()][cpy].values, path=test_file_path)
+utils.to_pkl_gzip(obj=df[~df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=train_file_path)
+utils.to_pkl_gzip(obj=df[df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=test_file_path)
 
 # 金利合計（分割数考慮前）
 tmp_ir = (df[aan].values * df[cpy].values) / df[acr].values
