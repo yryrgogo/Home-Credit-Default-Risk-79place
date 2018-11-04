@@ -1,7 +1,7 @@
 standard=True
-#  standard=False
+standard=False
 bureau = False
-bureau = True
+#  bureau = True
 " Interest_Rate "
 import gc
 import numpy as np
@@ -53,7 +53,7 @@ if prev_ir:
         else:
             ir = ( (df[aan].values * df[cpy].values) / df[acr].values ) - 1.0
             df[f'ir_pred@'] = ir
-            df[f'ir_pred@'] = df[f'ir_pred@'].map(lambda x: x if (0.08<x) and (x<0.5) else np.nan)
+            df[f'ir_pred@'] = df[f'ir_pred@'].map(lambda x: x if (0.08<=x) and (x<=0.5) else np.nan)
             cnt = 'pred'
 
     ir_cols = [col for col in df.columns if col.count('ir_')]
@@ -69,7 +69,7 @@ df = utils.read_df_pkl('../input/clean_cpy*')
 df['Pred_CPY_diff_Cal_CPY@'] = df['CNT_PAYMENT'].values - (df['AMT_CREDIT'].values / df['AMT_ANNUITY'].values)
 
 
-f bureau:
+if bureau:
     kb = 'SK_ID_BUREAU'
     bur = utils.read_df_pkl('../input/clean_bur*')[[key, kb]].groupby(key)[kb].max().reset_index()
     df = df.reset_index().merge(bur, on=key, how='left')
@@ -117,22 +117,26 @@ file_path = f"../features/1_first_valid/"
 #  sys.exit()
 
 # 金利が何回分の支払いに対して発生しているか不明なので、3回刻みで一通り作る
-for cnt in range(9, 49, 3):
-#  for cnt in [47]:
-    if cnt<=45:
+for cnt in range(9, 40, 3):
+#  for cnt in range(27, 46, 3):
+    if cnt%6!=3 and cnt%12!=-3:
+        continue
+    if cnt<=60:
+    #  if cnt<=45:
         ir = ( (df[aan].values * cnt) / df[acr].values ) - 1.0
         df[f'ir_{cnt}@'] = ir
         #  if cnt==9 or cnt==15 or cnt==21 or cnt==27 or cnt==33:
         if cnt==6:
             pass
+        #  elif np.abs(cnt%12)==3:
+        #  elif cnt%6==3 or cnt%12==-3:
+        #      df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.08<=x) and (x<=0.25) else np.nan)
+        elif cnt==21:
+            df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.08<=x) and (x<=0.23) else np.nan)
         elif cnt==27:
-            df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.08<=x) and (x<=0.32) else np.nan)
-        elif cnt==30:
-            df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.08<=x) and (x<=0.40) else np.nan)
-        elif cnt==42:
-            df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.32<=x) and (x<=0.5) else np.nan)
-        elif cnt==45:
-            df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.41<=x) and (x<=0.5) else np.nan)
+            df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.08<=x) and (x<=0.23) else np.nan)
+        elif cnt==33:
+            df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.08<=x) and (x<=0.23) else np.nan)
         else:
             df[f'ir_{cnt}@'] = df[f'ir_{cnt}@'].map(lambda x: x if (0.08<=x) and (x<=0.5) else np.nan)
         print(f"{cnt} :", len(df[f'ir_{cnt}@'].dropna()))

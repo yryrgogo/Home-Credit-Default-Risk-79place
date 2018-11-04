@@ -92,6 +92,8 @@ def main():
 
     ir_list = [col for col in test.columns if col.count('ir_')]
     #  test[ir_list] = test[ir_list] + 0.005
+    #  train['CNT_PAYMENT@'] = train['CNT_PAYMENT@'].where( train['CNT_PAYMENT@']<=39, np.nan)
+    #  test['CNT_PAYMENT@'] = test['CNT_PAYMENT@'].where( test['CNT_PAYMENT@']<=39, np.nan)
 
     # 実験用
     #  df = utils.read_df_pkl('../input/clean_app*').sample(50000)
