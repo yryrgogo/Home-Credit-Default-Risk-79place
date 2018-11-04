@@ -2,6 +2,7 @@ win_path = f'../features/4_winner/*.gz'
 stack_name='add_nest'
 fname=''
 xray=False
+#  xray=True
 #========================================================================
 # argv[1] : model_type 
 # argv[2] : learning_rate
@@ -70,29 +71,32 @@ def main():
     # Data Load
     #========================================================================
 
-    #  base = utils.read_df_pkl('../input/base_app*')
-    #  win_path_list = glob.glob(win_path)
-    #  train_path_list = []
-    #  test_path_list = []
-    #  for path in win_path_list:
-    #      if path.count('train'):
-    #          train_path_list.append(path)
-    #      elif path.count('test'):
-    #          test_path_list.append(path)
+    base = utils.read_df_pkl('../input/base_app*')
+    win_path_list = glob.glob(win_path)
+    train_path_list = []
+    test_path_list = []
+    for path in win_path_list:
+        if path.count('train'):
+            train_path_list.append(path)
+        elif path.count('test'):
+            test_path_list.append(path)
 
-    #  base_train = base[~base[target].isnull()].reset_index(drop=True)
-    #  base_test = base[base[target].isnull()].reset_index(drop=True)
-    #  train_feature_list = utils.pararell_load_data(path_list=train_path_list)
-    #  test_feature_list = utils.pararell_load_data(path_list=test_path_list)
-    #  train = pd.concat(train_feature_list, axis=1)
-    #  train = pd.concat([base_train, train], axis=1)
-    #  test = pd.concat(test_feature_list, axis=1)
-    #  test = pd.concat([base_test, test], axis=1)
+    base_train = base[~base[target].isnull()].reset_index(drop=True)
+    base_test = base[base[target].isnull()].reset_index(drop=True)
+    train_feature_list = utils.pararell_load_data(path_list=train_path_list)
+    test_feature_list = utils.pararell_load_data(path_list=test_path_list)
+    train = pd.concat(train_feature_list, axis=1)
+    train = pd.concat([base_train, train], axis=1)
+    test = pd.concat(test_feature_list, axis=1)
+    test = pd.concat([base_test, test], axis=1)
+
+    ir_list = [col for col in test.columns if col.count('ir_')]
+    #  test[ir_list] = test[ir_list] + 0.005
 
     # 実験用
-    df = utils.read_df_pkl('../input/clean_app*').sample(50000)
-    train = df[df[target]>=0]
-    test = df[df[target].isnull()]
+    #  df = utils.read_df_pkl('../input/clean_app*').sample(50000)
+    #  train = df[df[target]>=0]
+    #  test = df[df[target].isnull()]
 
     metric = 'auc'
     fold=5
@@ -102,7 +106,7 @@ def main():
     oof_flg=True
     LGBM = lgb_ex(logger=logger, metric=metric, model_type=model_type, ignore_list=ignore_list)
 
-    train, test, drop_list = LGBM.data_check(train=train, test=test)
+    train, test, drop_list = LGBM.data_check(train=train, test=test, target=target)
     if len(drop_list):
         train.drop(drop_list, axis=1, inplace=True)
         test.drop(drop_list, axis=1, inplace=True)
@@ -147,17 +151,17 @@ def main():
         train.reset_index(inplace=True)
         train = train[LGBM.use_cols]
         result_xray = pd.DataFrame()
-        N_sample = 150000
+        N_sample = 500000
         max_point = 30
         for fold_num in range(fold):
             model = LGBM.fold_model_list[fold_num]
             if fold_num==0:
                 xray_obj = Xray_Cal(logger=logger, ignore_list=ignore_list, model=model)
-            xray_obj, tmp_xray = xray_obj.get_xray(base_xray=train, col_list=train.columns, fold_num=fold_num, N_sample=N_sample, max_point=max_point)
+            xray_obj, tmp_xray = xray_obj.get_xray(base_xray=train, col_list=train.columns, fold_num=fold_num, N_sample=N_sample, max_point=max_point, Pararell=True)
             tmp_xray.rename(columns={'xray':f'xray_{fold_num}'}, inplace=True)
 
             if len(result_xray):
-                result_xray.merge(tmp_xray.drop('N', axis=1), on=['feature', 'value'], how='inner')
+                result_xray = result_xray.merge(tmp_xray.drop('N', axis=1), on=['feature', 'value'], how='inner')
             else:
                 result_xray = tmp_xray.copy()
             del tmp_xray
@@ -165,7 +169,7 @@ def main():
 
         xray_col = [col for col in result_xray.columns if col.count('xray')]
         result_xray['xray_avg'] = result_xray[xray_col].mean(axis=1)
-        result_xray.to_csv(f'../output/{start_time[4:10]}_xray_{model_type}_CV{LGBM.cv_score}.csv')
+        result_xray.to_csv(f'../output/{start_time[4:10]}_xray_{model_type}_CV{LGBM.cv_score}.csv', index=False)
         sys.exit()
 
     submit = pd.read_csv('../input/sample_submission.csv')

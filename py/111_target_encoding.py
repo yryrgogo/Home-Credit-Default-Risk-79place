@@ -56,19 +56,3 @@ for cat in cat_list:
     test_file_path = f"../features/1_first_valid/test_{prefix}{col}"
     utils.to_pkl_gzip(obj=feat_train, path=train_file_path)
     utils.to_pkl_gzip(obj=feat_test, path=test_file_path)
-
-sys.exit()
-# Feature Save
-for col in df.columns:
-    if not(col.count('@')) or col in ignore_list:
-        continue
-
-    train_file_path = f"../features/1_first_valid/train_{prefix}{col}"
-    test_file_path = f"../features/1_first_valid/test_{prefix}{col}"
-    utils.to_pkl_gzip(obj=df[~df[target].isnull()][col].values, path=train_file_path)
-    utils.to_pkl_gzip(obj=df[df[target].isnull()][col].values, path=test_file_path)
-
-    logger.info(f'''
-    #========================================================================
-    # COMPLETE MAKE FEATURE : {train_file_path}
-    #========================================================================''')
