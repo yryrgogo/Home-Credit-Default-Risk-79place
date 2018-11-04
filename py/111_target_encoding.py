@@ -1,6 +1,4 @@
 feat_no = '111_'
-prefix = feat_no
-ext_feat=False
 import numpy as np
 import pandas as pd
 import datetime
@@ -41,13 +39,13 @@ test = df[df[target].isnull()]
 neighbor = '110_app_neighbor81@'
 train[neighbor] = utils.read_pkl_gzip('../input/train_110_app_neighbor81@.gz')
 test[neighbor] = utils.read_pkl_gzip('../input/test_110_app_neighbor81@.gz')
+combi = [neighbor, cat]
 cat_list = get_categorical_features(df=df, ignore_list=ignore_list)
 
 #========================================================================
 # TARGET ENCODING
 #========================================================================
 for cat in cat_list:
-    combi = [neighbor, cat]
     combi = cat
     feat_train, feat_test = target_encoding(logger=logger, train=train, test=test, key=key, level=combi, target=target, fold_type='stratified', group_col_name='', prefix='', ignore_list=ignore_list)
 

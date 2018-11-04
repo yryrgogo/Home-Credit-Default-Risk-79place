@@ -106,15 +106,24 @@ if standard:
 #========================================================================
 # Current ApplicationのInterest Rateを計算
 #========================================================================
+
 # CNT_PAYMENT
 file_path = f"../features/1_first_valid/"
 
+<<<<<<< HEAD
+# Current Application CNT_PAYMENT Save as Feature
+utils.to_pkl_gzip(obj=df[~df[target].isnull()][cpy].values, path=train_file_path)
+utils.to_pkl_gzip(obj=df[df[target].isnull()][cpy].values, path=test_file_path)
+utils.to_pkl_gzip(obj=df[~df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=train_file_path)
+utils.to_pkl_gzip(obj=df[df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=test_file_path)
+=======
 #  Current Application CNT_PAYMENT Save as Feature
 #  utils.to_pkl_gzip(obj=df[~df[target].isnull()][cpy].values, path=file_path+f'train_{cpy}@')
 #  utils.to_pkl_gzip(obj=df[df[target].isnull()][cpy].values, path=file_path +f'test_{cpy}@')
 #  utils.to_pkl_gzip(obj=df[~df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=file_path+'train_Pred_CPY_diff_Cal_CPY@')
 #  utils.to_pkl_gzip(obj=df[df[target].isnull()][ 'Pred_CPY_diff_Cal_CPY@' ].values, path=file_path+'test_Pred_CPY_diff_Cal_CPY@')
 #  sys.exit()
+>>>>>>> 0e2043f2852717c0cf66a8e72ef2fe8f222d4e5e
 
 # 金利が何回分の支払いに対して発生しているか不明なので、3回刻みで一通り作る
 for cnt in range(9, 40, 3):
