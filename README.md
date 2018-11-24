@@ -1,7 +1,8 @@
-# home-credit-default-risk
+# Home-Credit-Default-Risk
 kaggle competition
-
-
+  
+全くまとまっていません。  
+  
 ## ===================================
 ## コンペ期間中
 ## ===================================
