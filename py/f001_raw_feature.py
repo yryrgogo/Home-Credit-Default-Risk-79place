@@ -77,7 +77,7 @@ def feature_check(col):
 
 #  trans_to_dummies()
 
-def make_raw_feature(df, is_train):
+def make_raw_feature(df, is_train, is_num=False):
 
     columns = df.columns
     for col in columns:
@@ -86,16 +86,24 @@ def make_raw_feature(df, is_train):
         #  if not(col.count('DOCUMENT')):
         #      continue
 
-        if col in ignore_list: continue
-        value = df[col].values
-        if str(type(value[0])).count('object') or str(type(value[0])).count('str'):continue
+        if col in ignore_list:
+            continue
 
-        logger.info(f'# {col} To Pickle & GZIP. | LENGTH: {len(value)}')
+        feature = df[col].values
+
+        if is_num:
+            if str(type(feature[0])).count('object') or str(type(feature[0])).count('str'):
+                continue
+
+        logger.info(f'# {col} To Pickle & GZIP. | LENGTH: {len(feature)}')
+
         col = col.replace('.', '_').replace('/', '_')
         if is_train:
-            utils.to_pkl_gzip(obj=value, path=f'../features/1_first_valid/train_{feat_no}{col}')
+            utils.to_pkl_gzip(obj=feature, path=f'../features/1_first_valid/{feat_no}{col}')
         else:
-            utils.to_pkl_gzip(obj=value, path=f'../features/1_first_valid/test_{feat_no}{col}')
+            utils.to_pkl_gzip(obj=feature, path=f'../features/test_feature/{feat_no}{col}')
 
-make_raw_feature(df=train, is_train=True)
-make_raw_feature(df=test, is_train=False)
+
+if __name__=='__main__':
+    make_raw_feature(df=train, is_train=True)
+    make_raw_feature(df=test, is_train=False)

@@ -19,7 +19,6 @@ target = 'TARGET'
 #  app[target] = app[target].where(app[target]>=0, np.nan)
 #  utils.to_df_pkl(df=app, path='../input', fname='clean_application_train_test')
 #  sys.exit()
-utils.start(sys.argv[0])
 
 #==============================================================================
 # to pickle
@@ -92,6 +91,7 @@ def clean_bureau(bur):
     #==============================================================================''')
 
     bur = utils.read_df_pkl(path='../input/bureau*.p')
+    bur = bur[bur['CREDIT_CURRENCY']=='currency 1']
     bur['DAYS_CREDIT_ENDDATE'] = bur['DAYS_CREDIT_ENDDATE'].where(bur['DAYS_CREDIT_ENDDATE']>-36000, np.nan)
     bur['DAYS_ENDDATE_FACT'] = bur['DAYS_ENDDATE_FACT'].where(bur['DAYS_ENDDATE_FACT']>-36000, np.nan)
     bur['DAYS_CREDIT_UPDATE'] = bur['DAYS_CREDIT_UPDATE'].where(bur['DAYS_CREDIT_UPDATE']>-36000, np.nan)
@@ -176,29 +176,37 @@ def clean_ccb(ccb):
 
     utils.to_df_pkl(df=ccb, path='../input', fname='clean_ccb')
 
-app = utils.read_df_pkl(path='../input/application_train_test*.p')
-clean_app(app)
-del app
-gc.collect()
-bur = utils.read_df_pkl(path='../input/bureau*.p')
-clean_bureau(bur)
-del bur
-gc.collect()
-pre = utils.read_df_pkl(path='../input/prev*.p')
-clean_prev(pre)
-del pre
-gc.collect()
-pos = utils.read_df_pkl(path='../input/POS*.p')
-clean_pos(pos)
-del pos
-gc.collect()
-ins = utils.read_df_pkl(path='../input/install*.p')
-clean_ins(ins)
-del ins
-gc.collect()
-ccb = utils.read_df_pkl(path='../input/credit*.p')
-clean_ccb(ccb)
-del ccb
-gc.collect()
 
-utils.end(sys.argv[0])
+if __name__=="__main__":
+
+    #  with utils.timer("To Pickle"):
+    #      to_pkl()
+
+    with utils.timer("Cleansing"):
+
+        #  app = utils.read_df_pkl(path='../input/application_train_test*.p')
+        #  clean_app(app)
+        #  del app
+        #  gc.collect()
+
+        bur = utils.read_df_pkl(path='../input/bureau*.p')
+        clean_bureau(bur)
+        del bur
+        gc.collect()
+
+        #  pre = utils.read_df_pkl(path='../input/prev*.p')
+        #  clean_prev(pre)
+        #  del pre
+        #  gc.collect()
+        #  pos = utils.read_df_pkl(path='../input/POS*.p')
+        #  clean_pos(pos)
+        #  del pos
+        #  gc.collect()
+        #  ins = utils.read_df_pkl(path='../input/install*.p')
+        #  clean_ins(ins)
+        #  del ins
+        #  gc.collect()
+        #  ccb = utils.read_df_pkl(path='../input/credit*.p')
+        #  clean_ccb(ccb)
+        #  del ccb
+        #  gc.collect()
