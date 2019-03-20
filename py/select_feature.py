@@ -53,7 +53,7 @@ def to_win_dir_Nfeatures(path='../features/1_first_valid/*.gz', N=100):
             shutil.move('test_'+path, '../features/9_delete')
 
 
-def move_to_second_valid(best_select=[], path='', rank=0, key_list=[]):
+def move_to_second_valid(best_select=[], path='', rank=0, gain=0, key_list=[]):
     logger = logger_func()
     if len(best_select)==0:
         try:
@@ -63,11 +63,16 @@ def move_to_second_valid(best_select=[], path='', rank=0, key_list=[]):
             pass
         best_select = pd.read_csv(path)
         try:
-            if rank==0:
-                rank = int(sys.argv[3])
+            select_list = sys.argv[3].split('_')
+            select_type = select_list[0]
+            select_num = np.int(select_list[1])
         except IndexError:
             pass
-        best_feature = best_select.query(f"rank>={rank}")['feature'].values
+
+        if select_type=='rank':
+            best_feature = best_select.query(f"rank<={select_num}")['feature'].values
+        elif select_type=='gain':
+            best_feature = best_select.query(f"importance>={select_num}")['feature'].values
         try:
             best_feature = [col for col in best_feature if col.count(sys.argv[4])]
         except IndexError:
@@ -78,8 +83,8 @@ def move_to_second_valid(best_select=[], path='', rank=0, key_list=[]):
 
         path_list = glob.glob('../features/*.gz')
 
+        select_path = []
         for feature in best_feature:
-            move_path = []
             for path in path_list:
                 filename = re.search(r'/([^/.]*).gz', path).group(1)
                 if filename[:3]=='tra':
@@ -88,15 +93,16 @@ def move_to_second_valid(best_select=[], path='', rank=0, key_list=[]):
                     filename = filename[5:]
                 #  if path.count(feature) and feature not in ignore_list:
                 if feature==filename:
-                    move_path.append(path)
+                    select_path.append(path)
 
-            for move in move_path:
-                try:
-                    shutil.move(move, '../features/no_use/')
-                except FileNotFoundError:
-                    logger.info(f'FileNotFoundError: {feature}')
-                except shutil.Error:
-                    logger.info(f'Shutil Error: {feature}')
+        move_path = list(set(path_list) - set(select_path))
+        for move in move_path:
+            try:
+                shutil.move(move, '../features/no_use/')
+            except FileNotFoundError:
+                logger.info(f'FileNotFoundError: {feature}')
+            except shutil.Error:
+                logger.info(f'Shutil Error: {feature}')
         print(f'move to third_valid:{len(best_feature)}')
 
 

@@ -38,9 +38,12 @@ argv[2]: feature_key
 """
 comment = sys.argv[1]
 try:
-    rank = np.int(sys.argv[2])
+    select_list = sys.argv[2].split('_')
+    select_type = select_list[0]
+    select_num = np.int(select_list[1])
 except IndexError:
-    rank = 50000
+    select_type='rank'
+    select_num = 50000
 #========================================================================
 
 
@@ -58,7 +61,10 @@ feim_path = glob.glob('../valid/use_feim/*.csv')[0]
 base = utils.read_df_pkl('../input/base0*')[[key, target]].set_index(key)
 manage = FeatureManage(key, target)
 manage.set_base(base)
-train, test = manage.feature_matrix(feim_path=feim_path, rank=rank)
+if select_type=='rank':
+    train, test = manage.feature_matrix(feim_path=feim_path, rank=select_num)
+if select_type=='gain':
+    train, test = manage.feature_matrix(feim_path=feim_path, gain=select_num)
 
 if is_debug:
     train = train.head(10000)
