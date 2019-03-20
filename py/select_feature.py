@@ -76,21 +76,23 @@ def move_to_second_valid(best_select=[], path='', rank=0, key_list=[]):
         if len(best_feature)==0:
             sys.exit()
 
-        path_list = glob.glob('../features/4_winner/*')
+        path_list = glob.glob('../features/*.gz')
 
         for feature in best_feature:
             move_path = []
             for path in path_list:
                 filename = re.search(r'/([^/.]*).gz', path).group(1)
+                if filename[:3]=='tra':
+                    filename = filename[6:]
+                if filename[:3]=='tes':
+                    filename = filename[5:]
                 #  if path.count(feature) and feature not in ignore_list:
-                #  if feature==filename:
-                if feature==filename.replace('stan_', ''):
-                    #  print(f"{filename} | {feature}")
+                if feature==filename:
                     move_path.append(path)
 
             for move in move_path:
                 try:
-                    shutil.move(move, second_path)
+                    shutil.move(move, '../features/no_use/')
                 except FileNotFoundError:
                     logger.info(f'FileNotFoundError: {feature}')
                 except shutil.Error:

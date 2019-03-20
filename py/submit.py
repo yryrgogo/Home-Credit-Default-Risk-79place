@@ -15,12 +15,13 @@ import shutil
 pd.set_option('max_columns', 200)
 pd.set_option('max_rows', 200)
 
+COMPETITION_NAME = 'home-credit-default-risk'
 
 def main():
     submit = sys.argv[1]
     try:
         comment = sys.argv[2]
-        utils.submit(file_path=submit, comment=comment)
+        utils.submit(file_path=submit, comment=comment, COMPETITION_NAME=COMPETITION_NAME)
     except IndexError:
         utils.submit(file_path=submit)
 

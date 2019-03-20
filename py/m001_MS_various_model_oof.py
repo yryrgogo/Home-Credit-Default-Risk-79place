@@ -8,6 +8,7 @@ import re
 import gc
 import sys
 import glob
+import shutil
 import pandas as pd
 import numpy as np
 import datetime
@@ -31,7 +32,21 @@ except NameError:
 #========================================================================
 
 #========================================================================
+"""
+argv[1]: comment
+argv[2]: feature_key
+"""
+comment = sys.argv[1]
+try:
+    rank = np.int(sys.argv[2])
+except IndexError:
+    rank = 50000
+#========================================================================
+
+
+#========================================================================
 # Global Variable
+COMPETITION_NAME = 'home-credit-default-risk'
 sys.path.append(f"../py")
 from info_home_credit import hcdr_key_cols
 key, target, ignore_list = hcdr_key_cols()
@@ -39,10 +54,11 @@ key, target, ignore_list = hcdr_key_cols()
 
 #========================================================================
 # Data Load
+feim_path = glob.glob('../valid/use_feim/*.csv')[0]
 base = utils.read_df_pkl('../input/base0*')[[key, target]].set_index(key)
 manage = FeatureManage(key, target)
 manage.set_base(base)
-train, test = manage.feature_matrix()
+train, test = manage.feature_matrix(feim_path=feim_path, rank=rank)
 
 if is_debug:
     train = train.head(10000)
@@ -52,11 +68,6 @@ print(train.shape, test.shape)
 #========================================================================
 
 
-"""
-argv[1]: comment
-argv[2]: feature_key
-"""
-comment = sys.argv[1]
 
 # Basic Args
 seed = 1208
@@ -159,7 +170,7 @@ for model_type in model_type_list:
     submit.to_csv(submit_path, index=True)
 
     if is_submit:
-        utils.submit(file_path=submit_path, comment=comment)
+        utils.submit(file_path=submit_path, comment=comment, COMPETITION_NAME=COMPETITION_NAME)
         shutil.move(submit_path, '../log_submit/')
 
     #========================================================================
