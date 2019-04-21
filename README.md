@@ -1,5 +1,6 @@
-# Home-Credit-Default-Risk
-kaggle competition
+# Kaggle Home-Credit-Default-Risk
+kaggle competition  
+https://www.kaggle.com/c/home-credit-default-risk/submissions?sortBy=date&group=all&page=1&pageSize=20
   
 全くまとまっていません。  
   
